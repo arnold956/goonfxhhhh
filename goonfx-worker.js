@@ -1,7 +1,3 @@
-/** GOON FX Cloudflare Worker - Deriv OAuth exchange gateway
- * Deploy this Worker and route https://goonfx.com/api/* to it.
- * Store DERIV_CLIENT_ID as a Worker secret/variable.
- */
 const TOKEN_URL = 'https://auth.deriv.com/oauth2/token';
 
 function cors(origin) {
