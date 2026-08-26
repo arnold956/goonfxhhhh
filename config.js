@@ -1,5 +1,5 @@
 window.GOONFX_CONFIG = {
-  DERIV_CLIENT_ID: 'YOUR_DERIV_OAUTH_CLIENT_ID',
+  DERIV_CLIENT_ID: '34b2ctEChXoL5t579q8pB',
   DERIV_REDIRECT_URI: 'https://goonfx.com/callback.html',
   DERIV_SCOPE: 'trade',
   BACKEND_URL: 'https://api.goonfx.com',
