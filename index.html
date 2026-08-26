@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GOON FX PRO MAX — Deriv Trading Workspace</title>
+<script src="https://unpkg.com/lightweight-charts@4.2.2/dist/lightweight-charts.standalone.production.js">document.addEventListener('DOMContentLoaded',checkGoogleOrigin);</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{--bg:#03070b;--panel:#081019;--panel2:#0b141e;--panel3:#0f1924;--line:#1d2a36;--line2:#263746;--text:#f3f6f8;--muted:#82909e;--red:#ef3348;--red2:#a80e20;--green:#18d77a;--green2:#078c48;--blue:#2b8fe8;--amber:#f3b94f;--shadow:0 18px 50px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 50% -10%,#101b26 0,#03070b 45%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.hidden{display:none!important}
+.header{height:70px;background:rgba(3,7,11,.96);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:10px;min-width:210px}.mark{width:40px;height:40px;border:2px solid var(--red);border-radius:11px;display:grid;place-items:center;font-weight:1000;font-size:23px;font-style:italic;background:linear-gradient(145deg,#26080e,#090e15);box-shadow:0 0 24px #ef334833}.logo{font-size:29px;font-weight:1000;font-style:italic;letter-spacing:-2px}.logo span{color:var(--red)}
+.hamb{display:none;background:#0b121a;border:1px solid var(--line2);color:#fff;border-radius:7px;padding:8px 10px;margin-right:9px}.top-center{display:flex;align-items:center;gap:8px;flex:1}.connection{display:flex;align-items:center;gap:7px;border:1px solid #174f36;background:#07170f;color:#75e8aa;padding:8px 11px;border-radius:20px;font-size:11px;font-weight:800}.connection i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green)}.connection.off{border-color:#53313a;background:#160a0d;color:#ff9aa6}.connection.off i{background:var(--red);box-shadow:none}.header-right{display:flex;align-items:center;gap:8px}.acct-select{height:40px;background:#081019;border:1px solid var(--line2);color:#fff;border-radius:7px;padding:0 10px;font-weight:800}.acct-select.demo{border-color:#1d7548}.acct-select.real{border-color:#91303d}.header-balance{padding:9px 11px;border:1px solid var(--line);background:#081019;border-radius:7px;font-weight:800}.connect-btn{height:40px;background:linear-gradient(135deg,#ef3348,#b60e21);border:0;color:#fff;border-radius:7px;padding:0 14px;font-weight:900}
+#gxMaxHome{display:none!important}.app{max-width:1680px;margin:auto;padding:14px;display:grid;grid-template-columns:228px minmax(0,1fr) 330px;gap:13px}.side{height:calc(100vh - 98px);min-height:650px;position:sticky;top:84px;overflow:auto;background:linear-gradient(180deg,#0a1119,#060b10);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow)}.nav-title{padding:15px 14px 8px;color:#5e6d7c;font-size:9px;font-weight:900;letter-spacing:1.3px;text-transform:uppercase}.nav button{width:100%;height:45px;border:0;border-bottom:1px solid #121d27;background:transparent;color:#cbd4dc;text-align:left;padding:0 14px;display:flex;align-items:center;gap:10px}.nav button:hover,.nav button.active{background:#111b25;color:#fff;box-shadow:inset 3px 0 var(--red)}.nav button.active{font-weight:800}.ico{width:22px;text-align:center;color:#8795a4}.nav-foot{margin:12px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#071019}.nav-foot b{font-size:12px}.nav-foot p{font-size:10px;color:var(--muted);line-height:1.5;margin:6px 0 0}
+main{min-width:0}.page{display:none}.page.active{display:block}.section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 13px}.section-title h1{font-size:27px;letter-spacing:-.8px;margin:0}.section-title p{margin:5px 0 0;color:var(--muted);font-size:11px}.section-actions{display:flex;gap:7px;flex-wrap:wrap}.pill{border:1px solid var(--line2);background:#081019;color:#bfc9d2;border-radius:20px;padding:7px 10px;font-size:10px;font-weight:800}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:11px}.kpi{background:linear-gradient(145deg,#0b141e,#070d13);border:1px solid var(--line);border-radius:8px;padding:12px;min-height:92px}.kpi small{display:block;color:#738190;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px}.kpi b{display:block;font-size:21px;margin-top:8px;letter-spacing:-.3px}.kpi span{display:block;color:var(--muted);font-size:9px;margin-top:5px}.kpi.green b{color:var(--green)}.kpi.red b{color:#ff7380}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1fr) 275px;gap:10px}.trade-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:8px;background:#071019;border:1px solid var(--line);border-radius:9px;position:sticky;top:0;z-index:20}.trade-shortcuts button{border:1px solid #294253;background:#0b1721;color:#fff;border-radius:7px;padding:9px 13px;font-size:10px;font-weight:1000;cursor:pointer}.trade-shortcuts button:hover{background:#172b3a;border-color:#4b7188}.chart-card{min-height:610px}.chart{min-height:505px;background:#050b11}.chart canvas{display:block}.manual-tabs button{cursor:pointer}.chart-card,.watch-card,.panel{background:linear-gradient(180deg,#0a121b,#070d13);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow)}.chart-card{overflow:hidden}.chart-toolbar{min-height:52px;padding:7px 9px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;flex-wrap:wrap}.chart-toolbar button{border:0;background:transparent;color:#84919e;border-radius:5px;padding:8px 9px;font-size:11px;font-weight:800}.chart-toolbar button.active,.chart-toolbar button:hover{background:#172330;color:#fff}.market-select{margin-left:auto;min-width:220px;height:36px;background:#060b10;border:1px solid var(--line2);color:#fff;border-radius:5px;padding:0 9px}.chart{height:505px;position:relative}.chart-status{position:absolute;inset:0;display:grid;place-items:center;color:#82909e;font-size:11px;pointer-events:none;z-index:2;background:rgba(8,14,21,.35)}.chart-status.ok{display:none}.chart-status.bad{display:grid;color:#ff9aa6;background:rgba(8,14,21,.78)}.chart-meta{display:flex;justify-content:space-between;padding:9px 11px;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}.chart-meta b{color:#fff}.watch-card{overflow:hidden}.watch-head{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.watch-head b{font-size:13px}.watch-head span{font-size:9px;color:var(--muted)}.watch-row{padding:10px 11px;border-bottom:1px solid #14202a;cursor:pointer}.watch-row:hover,.watch-row.active{background:#101a24}.watch-row.active{box-shadow:inset 3px 0 var(--red)}.watch-top,.watch-bottom{display:flex;justify-content:space-between;gap:8px}.watch-name{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.watch-price{font-size:11px;font-weight:900}.watch-bottom{margin-top:4px;color:#71808e;font-size:9px}.watch-live{color:var(--green)}
+.lower-grid{display:grid;grid-template-columns:minmax(0,1fr) 275px;gap:10px;margin-top:10px}.panel-head{height:45px;padding:0 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.panel-head b{font-size:12px}.panel-head span{color:var(--muted);font-size:9px}.table-wrap{overflow:auto}.data-table{width:100%;border-collapse:collapse}.data-table th,.data-table td{padding:10px 11px;border-bottom:1px solid #14202a;text-align:left;font-size:10px;white-space:nowrap}.data-table th{color:#71808e;font-weight:700}.empty{text-align:center;color:#6e7c89;padding:24px!important}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:9px}.quick-grid button{min-height:58px;background:#0b141e;border:1px solid var(--line2);color:#dce4ea;border-radius:7px;text-align:left;padding:9px}.quick-grid button:hover{border-color:#4c6172;background:#111c27}.quick-grid b{display:block;font-size:11px}.quick-grid span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.right-ticket{background:linear-gradient(180deg,#0b141e,#070d13);border:1px solid var(--line);border-radius:9px;position:sticky;top:84px;align-self:start;box-shadow:var(--shadow);overflow:hidden}.ticket-head{padding:14px;border-left:4px solid var(--red);border-bottom:1px solid var(--line)}.ticket-head b{font-size:18px}.ticket-head span{display:block;color:var(--muted);font-size:9px;margin-top:4px}.ticket-body{padding:13px}.field{margin-bottom:11px}.field label{display:block;color:#9aa8b5;font-size:9px;font-weight:800;letter-spacing:.5px;margin-bottom:5px}.field input,.field select,.tool input,.tool select,.market-search{width:100%;height:39px;background:#050a0f;color:#fff;border:1px solid var(--line2);border-radius:5px;padding:0 9px;outline:none}.field input:focus,.field select:focus,.tool input:focus,.tool select:focus{border-color:#47708f}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.quote-box{margin-top:9px;border-top:1px solid var(--line)}.quote-line{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #14202a;font-size:11px}.quote-line span{color:var(--muted)}.quote-line b{color:#fff}.quote-line b.profit{color:var(--green)}.trade-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.trade-buttons button{height:45px;border:0;border-radius:6px;color:#fff;font-weight:1000}.buy-rise{background:linear-gradient(#19d97b,#07934b)}.buy-fall{background:linear-gradient(#f33b50,#b70e20)}.status{padding:8px 9px;border:1px solid var(--line);border-radius:6px;background:#071017;color:#84919e;font-size:10px;line-height:1.45;margin-top:9px}.status.ok{border-color:#1c7049;color:#7fe5ac}.status.bad{border-color:#6e2934;color:#ff9aa5}.status.warn{border-color:#71541e;color:#f6ca6d}
+.toolpage{background:linear-gradient(180deg,#0a121b,#070d13);border:1px solid var(--line);border-radius:9px;padding:18px;min-height:690px}.toolpage h2{margin:0;padding-left:10px;border-left:4px solid var(--red);font-size:23px}.toolpage>p{color:var(--muted);font-size:11px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:17px}.tool{background:#081019;border:1px solid var(--line);border-radius:7px;padding:11px}.tool label{display:block;color:#8d9aa8;font-size:9px;font-weight:800;letter-spacing:.4px;margin-bottom:5px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.btn{height:40px;padding:0 13px;background:#0c2942;border:1px solid #285a80;color:#fff;border-radius:6px;font-size:10px;font-weight:900}.btn.green{background:#0b934b;border-color:#18d77a}.btn.red{background:#9d1526;border-color:#ef3348}.btn.ghost{background:#081019;border-color:var(--line2)}
+.market-controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.market-controls input,.market-controls select{height:40px;background:#050a0f;border:1px solid var(--line2);color:#fff;border-radius:5px;padding:0 10px}.market-controls input{flex:1;min-width:220px}.market-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.market-card{background:#081019;border:1px solid var(--line);border-radius:7px;padding:12px}.market-card:hover{border-color:#405466}.market-card b{font-size:12px}.market-card small{display:block;color:var(--muted);font-size:9px;margin-top:4px}.market-card button{margin-top:10px;width:100%;height:34px;border:1px solid #285a80;background:#0b2133;color:#fff;border-radius:5px;font-size:9px;font-weight:900}
+.account-hero{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:9px}.account-stat{background:#081019;border:1px solid var(--line);padding:14px;border-radius:7px}.account-stat small{color:var(--muted);font-size:9px}.account-stat b{display:block;margin-top:7px;font-size:19px}.oauth{margin-top:12px;padding:15px;border:1px solid #29475e;background:linear-gradient(135deg,#0b1b29,#081018);border-radius:8px}.oauth b{display:block}.oauth p{color:var(--muted);font-size:10px;line-height:1.5}.oauth-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.oauth-buttons button{height:62px;text-align:left;padding:0 13px;border-radius:7px;color:#fff;background:#081019;border:1px solid var(--line2)}.oauth-buttons button:hover{border-color:#5a7081}.oauth-buttons strong{display:block;font-size:13px}.oauth-buttons span{font-size:9px;color:var(--muted)}.connected{display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:9px;margin-top:10px}.connected>div{background:#081019;border:1px solid var(--line);border-radius:7px;padding:10px}.connected small{display:block;color:var(--muted);font-size:8px}.connected b{display:block;margin-top:5px;font-size:11px}.security{margin-top:10px;color:#71808e;font-size:9px;line-height:1.5}
+.toast{position:fixed;right:18px;bottom:18px;z-index:300;background:#0c1620;border:1px solid var(--line2);border-radius:8px;padding:12px 14px;box-shadow:var(--shadow);font-size:11px;max-width:340px;transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s}.toast.show{transform:none;opacity:1}.toast.ok{border-color:#1d7048}.toast.bad{border-color:#702a35}.modal-backdrop{position:fixed;inset:0;background:#0009;z-index:250;display:grid;place-items:center}.modal{width:min(520px,calc(100vw - 30px));background:#0a121b;border:1px solid var(--line2);border-radius:10px;box-shadow:var(--shadow);padding:17px}.modal h3{margin:0}.modal p{font-size:11px;color:var(--muted);line-height:1.5}.modal .close{float:right;background:transparent;border:0;color:#8d9aa7;font-size:20px}
+@media(max-width:1320px){.app{grid-template-columns:210px minmax(0,1fr)}.right-ticket{grid-column:1/-1;position:static}.dashboard-grid,.lower-grid{grid-template-columns:minmax(0,1fr) 250px}.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.dashboard-grid,.lower-grid{grid-template-columns:1fr}.watch-card{order:-1}.market-grid{grid-template-columns:repeat(2,1fr)}.account-hero{grid-template-columns:1fr 1fr}.connected{grid-template-columns:1fr 1fr}.brand{min-width:auto}.top-center{display:none}}
+@media(max-width:720px){.header{height:62px;padding:0 8px}.hamb{display:block}.logo{font-size:24px}.mark{width:34px;height:34px}.connection{display:none}.header-balance{display:none}.acct-select{height:36px;max-width:140px}.connect-btn{height:36px;padding:0 9px}.app{display:block;padding:8px}.side{display:none;position:fixed;left:8px;right:8px;top:70px;bottom:8px;height:auto;z-index:150}.side.open{display:block}.kpis{grid-template-columns:1fr 1fr}.kpi b{font-size:17px}.section-title{align-items:flex-start;flex-direction:column}.chart{height:390px;position:relative}.market-select{width:100%;margin-left:0}.market-grid{grid-template-columns:1fr}.form-grid,.account-hero,.oauth-buttons,.connected{grid-template-columns:1fr}.right-ticket{margin-top:10px}.toolpage{padding:13px}.two{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr 1fr}}
+
+.google-login{margin-top:12px;padding:14px;border:1px solid #29475e;background:#08131e;border-radius:8px}.google-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.google-badge{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#4285f4;font-weight:1000;font-size:20px}.google-user{display:none;align-items:center;gap:9px}.google-user img{width:32px;height:32px;border-radius:50%}.google-user b{font-size:11px}.manual-shell{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;margin-top:14px}.manual-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.manual-tabs button{border:1px solid var(--line2);background:#081019;color:#b8c3cd;border-radius:20px;padding:8px 12px;font-size:10px;font-weight:900}.manual-tabs button.active{background:#152535;color:#fff;border-color:#456b86}.digit-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:8px}.digit-grid button{height:42px;border:1px solid var(--line2);background:#081019;color:#fff;border-radius:7px;font-weight:900}.digit-grid button.active{background:#25333d;border-color:#6b7c88}.live-ticket{background:#f4f5f6;color:#111;border-radius:9px;overflow:hidden}.live-ticket .ticket-title{padding:13px 14px;border-bottom:1px solid #d8dadd;font-size:15px;font-weight:900}.live-ticket .ticket-section{padding:12px;border-bottom:1px solid #ddd}.live-ticket .ticket-section small{display:block;color:#73777c;font-size:9px;font-weight:800;text-transform:uppercase;margin-bottom:6px}.tick-slider{width:100%}.live-ticket .stake-row{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #ddd;border-radius:6px;padding:0 9px;height:42px}.live-ticket .stake-row button{border:0;background:transparent;font-size:20px}.live-ticket .stake-row b{font-size:18px}.payout-big{font-size:19px;font-weight:1000}.payout-big span{font-size:10px;color:#888;font-weight:600}.bot-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:15px}.bot-block{background:#081019;border:1px solid var(--line);border-radius:8px;padding:13px}.bot-block h3{margin:0 0 10px;font-size:13px}.bot-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.bot-row label{font-size:9px;color:var(--muted);font-weight:800;display:block;margin-bottom:4px}.bot-log{height:250px;overflow:auto;background:#050a0f;border:1px solid var(--line);border-radius:6px;padding:8px;font:10px ui-monospace,monospace;color:#91a0ad}.bot-state{display:flex;justify-content:space-between;align-items:center;padding:9px;background:#071017;border:1px solid var(--line);border-radius:6px;margin-bottom:9px}.bot-dot{width:8px;height:8px;border-radius:50%;background:#6f7d89}.bot-dot.on{background:var(--green);box-shadow:0 0 10px var(--green)}
+@media(max-width:1100px){.manual-shell,.bot-layout{grid-template-columns:1fr}.live-ticket{order:-1}}
+
+/* GOON FX BAR CONTRACT CONTROLS */
+.gx-circles{display:grid!important;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;padding:12px}
+.gx-circle{
+  width:100%!important;height:58px!important;border-radius:8px!important;
+  border:1px solid #2a3947!important;background:#fff!important;color:#111!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:10px;
+  font-size:15px!important;font-weight:950!important;letter-spacing:.6px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);transition:.15s ease;
+}
+.gx-circle span{font-size:12px!important;font-weight:950!important}
+.gx-circle.rise,.gx-circle[data-ct="DIGITOVER"]{background:#19c36b!important;color:#04130a!important;border-color:#42e28b!important}
+.gx-circle.fall,.gx-circle[data-ct="DIGITUNDER"]{background:#ef3348!important;color:#fff!important;border-color:#ff6575!important}
+.gx-circle[data-ct="DIGITEVEN"],.gx-circle[data-ct="DIGITODD"]{background:#fff!important;color:#111!important}
+.gx-circle.active{outline:3px solid rgba(255,255,255,.45);transform:translateY(-1px);filter:brightness(1.08)}
+.gx-contract-panel .gx-cw-head{padding:12px 14px}
+.gx-digit-circles{display:grid!important;grid-template-columns:repeat(10,1fr);gap:6px;padding:8px 12px 12px}
+.gx-digit-circle{border-radius:6px!important;width:auto!important;height:34px!important}
+.gx-bot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.gx-bot-card{background:linear-gradient(145deg,#0b151f,#071018);border:1px solid #213140;border-radius:10px;padding:16px;min-height:145px;display:flex;flex-direction:column;justify-content:space-between}
+.gx-bot-card h3{margin:0 0 6px;font-size:15px}.gx-bot-card p{color:#8e9ba7;font-size:12px;line-height:1.5;margin:0 0 12px}
+.gx-bot-card .bot-btn{border:1px solid #2a3b4b;background:#101d28;color:#fff;border-radius:7px;padding:10px;font-weight:900;cursor:pointer}
+.gx-bot-card .bot-btn:hover{background:#172936}
+@media(max-width:700px){.gx-circles{grid-template-columns:1fr}.gx-digit-circles{grid-template-columns:repeat(5,1fr)}}
+</style>
+<style>
+.pro-terminal-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 14px;background:#061018;border-bottom:1px solid #1b2a35;position:sticky;top:0;z-index:50;font-size:10px}.pro-terminal-bar b{color:#fff}.pro-terminal-bar span{color:#6f8190;margin-left:8px}.pro-terminal-bar button{margin-left:5px;border:1px solid #2b4657;background:#0b1822;color:#fff;border-radius:6px;padding:7px 9px;font-size:9px;font-weight:900;cursor:pointer}.pro-status{display:flex;align-items:center;gap:6px}.pro-status i{width:7px;height:7px;border-radius:50%;background:#57d18b;box-shadow:0 0 8px #57d18b}.digit-analytics{margin:10px 0}.analytics-body{display:grid;grid-template-columns:1fr 180px;gap:12px;padding:12px}.digit-heat{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}.heat-circle{aspect-ratio:1;border-radius:50%;border:1px solid #2c4555;background:#09151e;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative}.heat-circle strong{font-size:20px}.heat-circle span{font-size:8px;color:#8495a3}.heat-circle.hot{border:2px solid #8fd8ff;box-shadow:0 0 18px rgba(143,216,255,.25);transform:scale(1.03)}.analytics-side{display:grid;grid-template-columns:1fr 1fr;gap:8px}.analytics-side>div{padding:9px;background:#071017;border:1px solid #1a2a34;border-radius:7px}.analytics-side small{display:block;color:#708391;font-size:8px}.analytics-side strong{font-size:22px;color:#fff}.analytics-side .status{grid-column:1/-1;font-size:9px}.analytics-foot{padding:8px 12px;border-top:1px solid #172630;color:#728491;font-size:8px}@media(max-width:800px){.pro-terminal-bar{flex-wrap:wrap}.analytics-body{grid-template-columns:1fr}.digit-heat{grid-template-columns:repeat(5,1fr)}}
+</style>
+<style id="goon-traderkit-style">
+:root{
+  --gx-bg:#080d12;--gx-panel:#0d151d;--gx-line:#23313d;
+  --gx-text:#f4f7fb;--gx-muted:#8b99a6;--gx-purple:#5b18ff;
+  --gx-green:#16c784;--gx-red:#ef334e;
+}
+.gx-public-header{height:66px;background:#090f15;border-bottom:1px solid #27323c;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100}
+.gx-brand{display:flex;align-items:center;gap:12px;font-weight:1000;color:#fff;font-size:22px;letter-spacing:-1px}
+.gx-logo{width:38px;height:38px;border:3px solid #ef2d4e;border-radius:12px;display:grid;place-items:center;font-size:22px;font-style:italic}
+.gx-brand span{color:#ef2d4e}.gx-center-url{color:#89949f;font-size:15px}.gx-auth{display:flex;gap:10px}.gx-auth button{height:44px;padding:0 22px;border-radius:9px;font-weight:900;font-size:15px;cursor:pointer}.gx-login{background:transparent;border:1px solid #4a5966;color:#fff}.gx-signup{background:#3511aa;border:0;color:#fff}
+.gx-ticker{height:38px;background:#070c11;border-bottom:1px solid #19252f;display:flex;gap:32px;align-items:center;overflow:hidden;white-space:nowrap;color:#95a2ae;font-size:12px;font-weight:900}
+.gx-ticker b{color:#53a7df}.gx-ticker .up{color:#16c784}.gx-ticker .down{color:#ef9a42}
+.gx-hero{min-height:610px;background:radial-gradient(circle at 50% 35%,rgba(0,171,135,.16),transparent 48%),linear-gradient(#080d12,#0a1118);display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 18px 70px}
+.gx-pill{border:1px solid #0c805f;background:rgba(9,77,63,.25);color:#b98cff;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:1000;letter-spacing:.5px}
+.gx-hero h1{font-size:44px;line-height:1.05;margin:28px 0 10px;letter-spacing:-1.8px}.gx-hero h1 em{color:#bca1ff;font-style:normal}.gx-hero p{max-width:820px;color:#9ba6af;font-size:16px;line-height:1.5;margin:0 0 20px}
+.gx-hero-actions{display:flex;gap:14px;margin-top:10px}.gx-hero-actions button{height:58px;border-radius:9px;padding:0 30px;border:0;font-size:17px;font-weight:1000;cursor:pointer}.gx-trade{background:#3610b8;color:#fff;box-shadow:0 10px 30px rgba(55,16,184,.25)}.gx-create{background:#fff;color:#172033}
+.gx-testimonials{width:min(1050px,100%);margin-top:72px}.gx-testimonials h2{font-size:23px;margin-bottom:18px}.gx-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;text-align:left}.gx-card{background:#f8f9fb;color:#172033;border-radius:15px;padding:22px;min-height:150px}.gx-avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:1000;float:left;margin-right:12px;background:#a8edf7}.gx-card:nth-child(2) .gx-avatar{background:#ffe043}.gx-card:nth-child(3) .gx-avatar{background:#f7a1a6}.gx-stars{color:#ff9b00;margin:12px 0}.gx-card small{color:#708090}.gx-card p{clear:both;margin-top:14px;line-height:1.4;color:#445261}
+.gx-footer{background:#0d121c;border-top:1px solid #19252f;text-align:center;color:#78838e;padding:16px;font-size:11px}
+
+#gxConnectionModal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+#gxConnectionModal.open{display:flex}.gx-connect-box{width:min(520px,100%);background:#0c151e;border:1px solid #2b3d4a;border-radius:16px;box-shadow:0 25px 80px #000;padding:24px}.gx-connect-box h2{margin:0 0 8px}.gx-connect-box p{color:#92a0ac;line-height:1.5;font-size:13px}.gx-connect-status{padding:12px;border:1px solid #284050;background:#081118;border-radius:9px;margin:15px 0;color:#b4c2cd}.gx-connect-status.ok{border-color:#087d59;color:#4ee5ae}.gx-connect-status.bad{border-color:#8b2435;color:#ff8798}.gx-connect-actions{display:flex;gap:10px}.gx-connect-actions button{flex:1;height:48px;border-radius:8px;border:0;font-weight:1000;cursor:pointer}.gx-deriv{background:#ef334e;color:#fff}.gx-cancel{background:#17232d;color:#fff}
+@media(max-width:760px){.gx-public-header{padding:0 12px}.gx-center-url{display:none}.gx-hero h1{font-size:34px}.gx-cards{grid-template-columns:1fr}.gx-auth button{padding:0 12px}}
+</style>
+
+
+
+
+
+<script id="gx-max-controls">
+function gxMaxLaunch(){
+  const app=document.getElementById('gxTradingApp')||document.querySelector('.app');
+  if(app){
+    app.style.display='grid';
+    app.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  if(typeof go==='function') go('dashboard');
+}
+function gxMaxConnect(){
+  const mode=(document.getElementById('accountMode')?.value||'demo');
+  sessionStorage.setItem('gx_google_then_deriv','1');
+  sessionStorage.setItem('gx_google_then_deriv_mode',mode);
+  if(typeof startGoogleLogin==='function'){
+    startGoogleLogin();
+    return;
+  }
+  alert('Google Sign-In is not loaded. Please refresh the page.');
+}
+</script>
+<script id="gx-main-oauth-listener">
+window.addEventListener('message',async function(ev){
+  if(ev.origin!==location.origin)return;
+  const d=ev.data||{};
+  if(d.type!=='GOONFX_DERIV_OAUTH_CALLBACK')return;
+  if(d.error){
+    const s=document.getElementById('gxMaxLoginStatus');
+    if(s){s.style.display='block';s.textContent='Deriv login failed: '+(d.error_description||d.error);}
+    return;
+  }
+  if(typeof gxCompletePopupOAuth==='function'){
+    await gxCompletePopupOAuth(d.code,d.state,sessionStorage.getItem('gx_popup_mode')||'demo');
+  }
+});
+</script>
+<script>
+/* ===== GOON FX BULK TRADER ===== */
+const BULK={running:false,selected:new Set(),done:0,failed:0,totalStake:0};
+function bulkFilteredMarkets(){
+  const q=($('bulkMarketSearch')?.value||'').trim().toLowerCase(), g=$('bulkMarketGroup')?.value||'all';
+  return markets.filter(m=>(g==='all'||classify(m)===g)&&(`${m.display_name||''} ${m.symbol||''}`.toLowerCase().includes(q)));
+}
+function renderBulkMarkets(){
+  const list=bulkFilteredMarkets();
+  $('bulkMarketCount').textContent=markets.length+' active · '+list.length+' shown';
+  $('bulkMarketList').innerHTML=list.map(m=>`<label class="bulk-market-row">
+    <input type="checkbox" value="${esc(m.symbol)}" ${BULK.selected.has(m.symbol)?'checked':''} onchange="toggleBulkMarket('${esc(m.symbol)}',this.checked)">
+    <div class="bm-name">${esc(m.display_name||m.symbol)}<small>${esc(m.symbol)} · ${classify(m)}</small></div>
+  </label>`).join('')||'<div class="empty">No active markets match the filter.</div>';
+  $('bulkSelectedCount').textContent=BULK.selected.size;
+  $('bulkSummarySelected').textContent=BULK.selected.size;
+}
+function toggleBulkMarket(sym,on){if(on)BULK.selected.add(sym);else BULK.selected.delete(sym);$('bulkSelectedCount').textContent=BULK.selected.size;$('bulkSummarySelected').textContent=BULK.selected.size}
+function bulkSelectAll(on){if(on)markets.forEach(m=>BULK.selected.add(m.symbol));else BULK.selected.clear();renderBulkMarkets()}
+function bulkSelectFiltered(){bulkFilteredMarkets().forEach(m=>BULK.selected.add(m.symbol));renderBulkMarkets()}
+$('bulkMarketSearch')?.addEventListener('input',renderBulkMarkets);
+$('bulkMarketGroup')?.addEventListener('change',renderBulkMarkets);
+$('bulkType')?.addEventListener('change',()=>{const digit=/^DIGIT/.test($('bulkType').value);$('bulkBarrierTool').style.display=digit?'block':'none'});
+function bulkLog(msg,type=''){
+  const e=$('bulkLog');if(!e)return;
+  e.textContent+=`[${new Date().toLocaleTimeString()}] ${msg}\n`;
+  e.scrollTop=e.scrollHeight;
+}
+function clearBulkLog(){if($('bulkLog'))$('bulkLog').textContent='[GOON FX PRO] Bulk log cleared.\n'}
+function stopBulkTrades(){BULK.running=false;bulkLog('STOP requested. The current request will finish, then execution stops.','warn');$('bulkStatus').textContent='Bulk execution stopped.';$('bulkStatus').className='status warn'}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+async function executeBulkTrades(){
+  if(BULK.running)return;
+  if(!authenticated||tradeWS?.readyState!==1){toast('Connect a Demo or Real Deriv account first.','bad');go('settings');return}
+  const selected=[...BULK.selected];
+  if(!selected.length){toast('Select at least one active market.','bad');return}
+  const stake=Number($('bulkStake').value),duration=Number($('bulkDur').value),unit=$('bulkUnit').value,barrier=$('bulkBarrier').value,delay=Math.max(250,Number($('bulkDelay').value)||750),type=$('bulkType').value;
+  if(!(stake>0)||!(duration>0)){toast('Stake and duration must be greater than zero.','bad');return}
+  if(/^DIGIT/.test(type)&&!Number.isInteger(Number(barrier))){toast('Digit barrier must be 0–9.','bad');return}
+  BULK.running=true;BULK.done=0;BULK.failed=0;BULK.totalStake=0;
+  $('bulkDone').textContent='0';$('bulkFailed').textContent='0';$('bulkTotalStake').textContent='0.00';
+  $('bulkStatus').textContent=`Executing ${selected.length} market(s) sequentially…`;$('bulkStatus').className='status';
+  bulkLog(`START: ${type}, ${stake} ${account?.currency||'USD'} each, ${duration}${unit}, ${selected.length} markets.`);
+  for(let i=0;i<selected.length;i++){
+    if(!BULK.running)break;
+    const symbol=selected[i];
+    const q={proposal:1,basis:'stake',currency:(account?.currency||'USD'),amount:stake,contract_type:type,underlying_symbol:symbol,duration,duration_unit:unit};
+    if(/^DIGIT/.test(type))q.barrier=String(barrier);
+    try{
+      const prop=await wsRequest(q,tradeWS);
+      if(!prop?.proposal?.id)throw Error('No proposal returned');
+      const p=prop.proposal;
+      const payout=Number(p.payout??p.ask_price),ask=Number(p.ask_price??stake);
+      bulkLog(`${i+1}/${selected.length} ${symbol}: proposal ${Number.isFinite(payout)?'payout '+payout.toFixed(2):'received'} — buying…`);
+      const bought=await wsRequest({buy:p.id,price:ask},tradeWS);
+      if(!bought?.buy)throw Error('Buy was not confirmed');
+      BULK.done++;BULK.totalStake+=ask;
+      $('bulkDone').textContent=BULK.done;$('bulkTotalStake').textContent=BULK.totalStake.toFixed(2);
+      bulkLog(`${i+1}/${selected.length} ${symbol}: BUY CONFIRMED · contract ${bought.buy.contract_id||'—'}`,'ok');
+      refreshAccount();
+    }catch(e){
+      BULK.failed++;$('bulkFailed').textContent=BULK.failed;
+      bulkLog(`${i+1}/${selected.length} ${symbol}: SKIPPED/FAILED — ${e.message}`);
+    }
+    if(i<selected.length-1&&BULK.running)await sleep(delay);
+  }
+  const stopped=!BULK.running&&BULK.done+BULK.failed<selected.length;
+  BULK.running=false;
+  $('bulkStatus').textContent=stopped?`Stopped. ${BULK.done} bought, ${BULK.failed} failed before stop.`:`Finished. ${BULK.done} bought, ${BULK.failed} failed/skipped.`;
+  $('bulkStatus').className='status '+(BULK.failed?'warn':'ok');
+  bulkLog(stopped?'STOPPED.':'FINISHED.');
+  refreshAccount();
+}
+const _goOriginal=go;
+go=function(page){
+  _goOriginal(page);
+  if(page==='bulk')renderBulkMarkets();
+};
+const _setMarketsOriginal=setMarkets;
+setMarkets=function(list){
+  _setMarketsOriginal(list);
+  renderBulkMarkets();
+};
+renderBulkMarkets();
+</script>
+
+<script id="gx-contract-circles-js">
+(function(){
+  const state={manualChart:null,bulkChart:null,manualSeries:null,bulkSeries:null,manualSub:null,bulkSub:null};
+  function circleDigits(id, callback){const el=document.getElementById(id);if(!el)return;el.innerHTML='';for(let i=0;i<10;i++){const b=document.createElement('button');b.className='gx-digit-circle';b.textContent=i;b.onclick=()=>{el.querySelectorAll('.gx-digit-circle').forEach(x=>x.classList.remove('active'));b.classList.add('active');callback(i)};el.appendChild(b)}}
+  function setupCircles(id, typeSetter, digitId){const root=document.getElementById(id);if(!root)return;root.querySelectorAll('.gx-circle').forEach(b=>b.onclick=()=>{root.querySelectorAll('.gx-circle').forEach(x=>x.classList.remove('active'));b.classList.add('active');typeSetter(b.dataset.ct)});circleDigits(digitId,i=>{const bar=document.getElementById('manualBarrier');if(bar)bar.value=i;const bb=document.getElementById('bulkBarrier');if(bb)bb.value=i})}
+  function makeChart(elId){const el=document.getElementById(elId);if(!el||!window.LightweightCharts)return null;el.innerHTML='';const c=LightweightCharts.createChart(el,{layout:{background:{color:'#050b11'},textColor:'#82909e'},grid:{vertLines:{color:'#101a23'},horzLines:{color:'#101a23'}},rightPriceScale:{borderColor:'#1c2a35'},timeScale:{borderColor:'#1c2a35',timeVisible:true,secondsVisible:false},crosshair:{mode:1}});const s=c.addLineSeries({lineWidth:2});return {c,s}}
+  function feedChart(which,symbol){const obj=which==='manual'?state.manualChart:state.bulkChart;if(!obj||!symbol||!publicWS||publicWS.readyState!==1)return;const load={ticks_history:symbol,end:'latest',count:120,style:'ticks',req_id:++reqSeq};publicWS.send(JSON.stringify(load));const id=load.req_id; if(which==='manual')state.manualSub=id;else state.bulkSub=id;obj.s.setData([]);const status=document.querySelector(which==='manual'?'#manualGraph .gx-mini-loading':'#bulkGraph .gx-mini-loading');if(status)status.textContent='Loading live graph…';}
+  const oldHandle=window.handlePublic;
+  window.handlePublic=function(d){if(oldHandle)oldHandle(d);if(d.msg_type==='history'&&d.history&&d.echo_req){const sym=d.echo_req.ticks_history;const arr=d.history.times.map((t,i)=>({time:Number(t),value:Number(d.history.prices[i])}));if(state.manualChart&&sym===document.getElementById('manualMarket')?.value)state.manualChart.s.setData(arr);if(state.bulkChart&&sym===document.getElementById('bulkGraphMarket')?.value)state.bulkChart.s.setData(arr);document.querySelectorAll('.gx-mini-loading').forEach(x=>x.textContent='');}if(d.msg_type==='tick'&&d.tick){const sym=d.tick.symbol,q=Number(d.tick.quote);const pt={time:Number(d.tick.epoch),value:q};if(state.manualChart&&sym===document.getElementById('manualMarket')?.value)state.manualChart.s.update(pt);if(state.bulkChart&&sym===document.getElementById('bulkGraphMarket')?.value)state.bulkChart.s.update(pt)}};
+  function syncManual(){const s=document.getElementById('manualMarket')?.value;if(s){const n=document.getElementById('manualGraphSymbol');if(n)n.textContent=s;feedChart('manual',s)}}
+  function syncBulk(){const s=document.getElementById('bulkGraphMarket')?.value;if(s){const n=document.getElementById('bulkGraphSymbol');if(n)n.textContent=s;feedChart('bulk',s)}}
+  function init(){state.manualChart=makeChart('manualGraph');state.bulkChart=makeChart('bulkGraph');setupCircles('manualContractCircles',ct=>{if(typeof setManualContract==='function')setManualContract(ct)},'manualDigitCircles');setupCircles('bulkContractCircles',ct=>{const x=document.getElementById('bulkType');if(x)x.value=ct;if(typeof renderBulkMarkets==='function')renderBulkMarkets()},'bulkDigitCircles');const mm=document.getElementById('manualMarket');if(mm)mm.addEventListener('change',syncManual);const bm=document.getElementById('bulkGraphMarket');if(bm)bm.addEventListener('change',syncBulk);const oldSet=window.setMarkets;window.setMarkets=function(list){oldSet(list);const bm=document.getElementById('bulkGraphMarket');if(bm){bm.innerHTML=markets.map(m=>`<option value="${m.symbol}">${m.display_name||m.symbol}</option>`).join('');bm.value=current||markets[0]?.symbol||'';}syncManual();syncBulk()};setTimeout(()=>{syncManual();syncBulk()},1000)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<script id="gx-page-contract-js">
+(function(){
+ const P={ou:{graph:'ouGraph',market:'ouMarket',label:'ouGraphSymbol',type:'ouType',barrier:'ouBarrier'},evenodd:{graph:'eoGraph',market:'eoMarket',label:'eoGraphSymbol',type:'eoType'},rise:{graph:'riseGraph',market:'riseMarket',label:'riseGraphSymbol',type:'riseType'}};
+ const C={};
+ function init(id){const x=P[id],el=document.getElementById(x.graph);if(!el||!window.LightweightCharts)return;el.innerHTML='';C[id]=LightweightCharts.createChart(el,{layout:{background:{color:'#050b11'},textColor:'#82909e'},grid:{vertLines:{color:'#101a23'},horzLines:{color:'#101a23'}},rightPriceScale:{borderColor:'#1c2a35'},timeScale:{borderColor:'#1c2a35',timeVisible:true,secondsVisible:false}});C[id].s=C[id].addLineSeries({lineWidth:2});const sel=document.getElementById(x.market);if(sel)sel.addEventListener('change',()=>load(id));}
+ function load(id){const x=P[id],sel=document.getElementById(x.market),symbol=sel?.value;if(!symbol||!C[id]||!publicWS||publicWS.readyState!==1)return;document.getElementById(x.label).textContent=symbol;C[id].s.setData([]);publicWS.send(JSON.stringify({ticks_history:symbol,end:'latest',count:100,style:'ticks',req_id:++reqSeq}));publicWS.send(JSON.stringify({ticks:symbol,subscribe:1,req_id:++reqSeq}));C[id].symbol=symbol}
+ const old=window.handlePublic;window.handlePublic=function(d){if(old)old(d);if(d.msg_type==='history'&&d.history){const req=d.echo_req?.ticks_history;for(const id in P){if(C[id]&&C[id].symbol===req){C[id].s.setData(d.history.times.map((t,i)=>({time:Number(t),value:Number(d.history.prices[i])})));}}}if(d.msg_type==='tick'&&d.tick){for(const id in P){if(C[id]&&C[id].symbol===d.tick.symbol)C[id].s.update({time:Number(d.tick.epoch),value:Number(d.tick.quote)});}}};
+ function wire(){for(const id in P){init(id);const root=document.getElementById(id);if(!root)continue;root.querySelectorAll('.gx-circle').forEach(b=>b.addEventListener('click',()=>{const t=document.getElementById(b.dataset.target);if(t){t.value=b.dataset.val;t.dispatchEvent(new Event('change',{bubbles:true}));root.querySelectorAll('.gx-circle').forEach(z=>z.classList.remove('active'));b.classList.add('active')}}));const dc=root.querySelector('.gx-digit-circles');if(dc&&P[id].barrier){for(let n=0;n<10;n++){const b=document.createElement('button');b.className='gx-digit-circle';b.textContent=n;b.onclick=()=>{document.getElementById(P[id].barrier).value=n;dc.querySelectorAll('.gx-digit-circle').forEach(z=>z.classList.remove('active'));b.classList.add('active')};dc.appendChild(b)}}}setTimeout(()=>{for(const id in P)load(id)},1200)}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
+})();
+</script>
+</body>';
+      setTimeout(()=>window.close(),500);
+    }
+  }catch(e){}
+})();
+</script>
+
+
+
+
+
+<style id="gx-max-shell">
+:root{
+ --max-bg:#070c12;--max-panel:#0c141d;--max-panel2:#111b25;--max-line:#263541;
+ --max-purple:#4a16d8;--max-purple2:#7b4cff;--max-green:#18c98a;--max-red:#ff4158;
+}
+.gx-max-home{background:linear-gradient(180deg,#070c12 0,#091219 58%,#0a1118 100%);border-bottom:1px solid var(--max-line)}
+.gx-max-head{height:78px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 34px;border-bottom:1px solid #1c2934;background:#080e14}
+.gx-max-brand{display:flex;align-items:center;gap:13px;font-weight:1000;font-size:24px;letter-spacing:-1px}
+.gx-max-mark{width:44px;height:44px;border:3px solid var(--max-red);border-radius:14px;display:grid;place-items:center;font-size:25px;font-style:italic;background:#050a0f}
+.gx-max-brand em{color:var(--max-red);font-style:normal}
+.gx-max-url{text-align:center;color:#8e9aa6;font-size:15px}
+.gx-max-actions{display:flex;justify-content:flex-end;gap:10px}
+.gx-max-actions button{height:46px;padding:0 22px;border-radius:9px;font-weight:1000;font-size:14px;cursor:pointer}
+.gx-max-login{background:transparent;color:#fff;border:1px solid #4b5966}
+.gx-max-sign{background:linear-gradient(135deg,#3510a8,#4d13dd);border:0;color:#fff}
+.gx-max-tape{height:44px;display:flex;align-items:center;gap:38px;overflow:hidden;white-space:nowrap;padding:0 20px;background:#060b10;border-bottom:1px solid #182630;font-size:12px;font-weight:900}
+.gx-max-tape span{color:#8b99a6}.gx-max-tape b{color:#54a7e2}.gx-max-tape .up{color:#16c98a}.gx-max-tape .down{color:#ff9d52}
+.gx-max-hero{text-align:center;min-height:610px;padding:70px 25px 82px;display:flex;flex-direction:column;align-items:center;background:
+radial-gradient(circle at 50% 42%,rgba(14,163,128,.17),transparent 42%),
+radial-gradient(circle at 50% 90%,rgba(72,17,196,.12),transparent 42%)}
+.gx-max-pill{border:1px solid #087e60;background:rgba(8,78,63,.22);color:#b98cff;padding:11px 22px;border-radius:30px;font-size:14px;font-weight:1000;letter-spacing:.6px}
+.gx-max-hero h1{font-size:clamp(48px,6vw,82px);line-height:.98;letter-spacing:-4px;margin:34px 0 20px;font-weight:1000}
+.gx-max-hero h1 em{font-style:normal;color:#bda6ff}
+.gx-max-hero p{max-width:980px;color:#99a6b1;font-size:18px;line-height:1.55;margin:0}
+.gx-max-cta{display:flex;gap:15px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.gx-max-cta button{height:64px;border-radius:10px;padding:0 34px;font-size:17px;font-weight:1000;cursor:pointer}
+.gx-max-primary{background:linear-gradient(135deg,#3b0fc3,#5d1df0);border:0;color:#fff;box-shadow:0 14px 45px rgba(73,17,210,.28)}
+.gx-max-secondary{background:#f6f7f9;border:0;color:#111827}
+.gx-max-stats{width:min(1150px,100%);display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:65px;text-align:left}
+.gx-max-stat{background:rgba(11,20,29,.82);border:1px solid #24343f;border-radius:12px;padding:18px}
+.gx-max-stat b{font-size:23px;display:block}.gx-max-stat span{color:#7f8c98;font-size:11px;display:block;margin-top:6px}
+.gx-max-tools{width:min(1150px,100%);margin-top:28px;text-align:left}
+.gx-max-tools h2{text-align:center;font-size:28px;margin:0 0 18px}
+.gx-max-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.gx-max-card{background:#f7f8fa;color:#182132;border-radius:13px;padding:20px;min-height:150px;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.gx-max-card .ico{font-size:26px;margin-bottom:12px}.gx-max-card b{font-size:15px}.gx-max-card p{font-size:11px;color:#536171;line-height:1.45;margin:8px 0 0}
+.gx-max-launch{margin-top:26px;text-align:center}.gx-max-launch button{height:52px;padding:0 26px;border-radius:9px;background:#0e1b25;border:1px solid #385263;color:#fff;font-weight:1000;cursor:pointer}
+.gx-max-terminal-title{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:18px 24px;background:#0a1219;border-top:1px solid #1d2b35;border-bottom:1px solid #1d2b35}
+.gx-max-terminal-title h2{margin:0;font-size:22px}.gx-max-terminal-title span{font-size:11px;color:#7d8b98}
+.gx-max-terminal-wrap{background:#050a0f;padding:12px}
+.gx-max-terminal-wrap .app{max-width:1800px;margin:0 auto}
+@media(max-width:1100px){.gx-max-head{grid-template-columns:1fr auto}.gx-max-url{display:none}.gx-max-stats{grid-template-columns:repeat(2,1fr)}.gx-max-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.gx-max-head{padding:0 12px}.gx-max-brand{font-size:19px}.gx-max-mark{width:36px;height:36px}.gx-max-actions button{padding:0 12px}.gx-max-hero{padding-top:45px}.gx-max-hero h1{font-size:43px;letter-spacing:-2px}.gx-max-hero p{font-size:14px}.gx-max-stats,.gx-max-grid{grid-template-columns:1fr}.gx-max-tape{gap:20px}}
+</style>
+
+<style id="gx-max-terminal-sizing">
+@media(min-width:1500px){
+  .header{height:78px}.side{width:280px}.app{grid-template-columns:280px minmax(0,1fr) 360px;max-width:none}
+  main{min-width:0}.chart{height:calc(100vh - 360px);min-height:560px}.chart-card{min-height:690px}
+  .dashboard-grid,.lower-grid{grid-template-columns:minmax(0,1fr) 320px}.right-ticket{top:92px}
+  .toolpage{min-height:760px}.manual-shell{grid-template-columns:minmax(0,1fr) 360px}.bot-layout{grid-template-columns:1.3fr .7fr}
+}
+<style id="gx-bulk-trader">
+.bulk-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:10px}
+.bulk-summary{display:flex;gap:18px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);background:#071019;margin-top:10px;font-size:11px;color:var(--muted)}
+.bulk-summary b{color:#fff}.bulk-market-tools{display:grid;grid-template-columns:1fr 150px;gap:8px;padding:10px}
+.bulk-market-tools input,.bulk-market-tools select{height:38px;background:#071019;border:1px solid var(--line2);color:#fff;border-radius:7px;padding:0 10px}
+.bulk-select-actions{display:flex;gap:6px;flex-wrap:wrap;padding:0 10px 10px}
+.bulk-select-actions .btn{height:34px;padding:0 10px;font-size:10px}
+.bulk-market-list{max-height:620px;overflow:auto;padding:0 10px 10px}
+.bulk-market-row{display:flex;align-items:center;gap:9px;padding:9px;border-bottom:1px solid #17232e;cursor:pointer}
+.bulk-market-row:hover{background:#0b151f}.bulk-market-row input{width:16px;height:16px}.bulk-market-row .bm-name{font-weight:800;font-size:11px;flex:1}.bulk-market-row small{display:block;color:var(--muted);font-size:9px;margin-top:2px}.bulk-log{margin:0;padding:12px;min-height:190px;max-height:320px;overflow:auto;white-space:pre-wrap;font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:#a9bac7;background:#050b10}
+@media(max-width:1000px){.bulk-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.bulk-market-tools{grid-template-columns:1fr}.bulk-summary{gap:10px}}
+</style>
+</style>
+
+<style id="gx-contract-circles">
+.gx-contract-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,.95fr);gap:10px;margin:12px 0}.gx-contract-panel,.gx-mini-chart-panel{background:linear-gradient(180deg,#0a121b,#070d13);border:1px solid var(--line);border-radius:10px;overflow:hidden}.gx-cw-head{min-height:44px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.gx-cw-head b{font-size:11px}.gx-cw-head span{font-size:9px;color:var(--muted)}.gx-circles{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px;padding:14px}.gx-circle{min-height:92px;border-radius:50%;border:1px solid #30495c;background:radial-gradient(circle at 35% 30%,#182b3a,#081018 70%);color:#dfe8ee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:20px;font-weight:1000;cursor:pointer;box-shadow:inset 0 0 0 1px #071018,0 5px 15px #0006;transition:.15s}.gx-circle span{font-size:8px;letter-spacing:.6px}.gx-circle:hover{transform:translateY(-2px);border-color:#62809a}.gx-circle.active{border-color:#fff;box-shadow:0 0 0 3px #ffffff18,0 0 22px #4a769455}.gx-circle.rise.active,.gx-circle[data-val="DIGITOVER"].active{background:radial-gradient(circle at 35% 30%,#1d9f69,#073c2a 72%)}.gx-circle.fall.active,.gx-circle[data-val="DIGITUNDER"].active{background:radial-gradient(circle at 35% 30%,#b72e40,#420c16 72%)}.gx-digit-circles{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;padding:0 14px 14px}.gx-digit-circle{width:100%;aspect-ratio:1;border-radius:50%;border:1px solid #30495c;background:radial-gradient(circle at 35% 30%,#182b3a,#081018 70%);color:#fff;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:inset 0 0 0 1px #071018}.gx-digit-circle .gx-pct{font-size:8px;color:#8fa2b1;font-weight:800}.gx-digit-circle.active{background:#213b4d;border-color:#fff}.gx-digit-circle.gx-live-digit{border-color:#79e9ad;box-shadow:0 0 0 2px #79e9ad33,0 0 14px #79e9ad33}.gx-digit-circle[data-digit="1"],.gx-digit-circle[data-digit="2"],.gx-digit-circle[data-digit="3"],.gx-digit-circle[data-digit="4"],.gx-digit-circle[data-digit="5"],.gx-digit-circle[data-digit="6"],.gx-digit-circle[data-digit="7"],.gx-digit-circle[data-digit="8"],.gx-digit-circle[data-digit="9"]{min-width:42px}.gx-mini-chart{height:310px;position:relative;background:#050b11}.gx-mini-loading{position:absolute;inset:0;display:grid;place-items:center;color:#778692;font-size:10px;z-index:2}.gx-mini-chart canvas{display:block}.gx-graph-select{margin:9px;width:calc(100% - 18px);height:34px;background:#050a0f;color:#fff;border:1px solid var(--line2);border-radius:6px;padding:0 8px}.gx-bulk-workspace{margin-bottom:10px}.gx-bulk-workspace .gx-mini-chart{height:330px}
+.gx-tick-tape{margin:0 14px 14px;border:1px solid #1b3444;border-radius:9px;background:linear-gradient(180deg,#071019,#050b10);overflow:hidden}
+.gx-tape-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid #162a38}
+.gx-tape-head div{display:flex;align-items:center;gap:8px}.gx-tape-head b{font-size:10px;color:#fff}.gx-tape-head span{font-size:8px;color:#6f8797}
+.gx-tape-strip{display:flex;gap:6px;align-items:center;overflow:hidden;padding:10px 11px;height:58px}
+.gx-tick{flex:0 0 36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#101d27;border:1px solid #29404f;color:#dce8ee;font-weight:900;font-size:13px;position:relative}
+.gx-tick small{position:absolute;top:39px;font-size:6px;color:#607887;font-weight:600}.gx-tick.latest{border-color:#7ce8ae;box-shadow:0 0 14px #7ce8ae33;transform:scale(1.08)}
+.gx-tape-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#172b37;border-top:1px solid #162a38}
+.gx-tape-stats span{background:#071019;padding:7px 8px;font-size:7px;color:#6f8797;text-transform:uppercase}.gx-tape-stats b{display:block;color:#dce8ee;font-size:10px;margin-top:2px}
+@media(max-width:600px){.gx-tape-stats{grid-template-columns:repeat(2,1fr)}}
+.gx-live-note{margin:0 14px 12px;padding:8px 10px;border:1px solid #1b3444;border-radius:7px;background:#071019;color:#8293a1;font-size:9px}.gx-live-note b{color:#fff}@media(max-width:1000px){.gx-contract-workspace{grid-template-columns:1fr}}@media(max-width:600px){.gx-digit-circles{grid-template-columns:repeat(5,1fr);gap:6px}.gx-circle{min-height:80px}}
+</style>
+</head>
+<body>
+
+<section class="gx-max-home" id="gxMaxHome">
+  <header class="gx-max-head">
+    <div class="gx-max-brand"><div class="gx-max-mark">G</div>GOON<em>FX</em></div>
+    <div class="gx-max-url">goonfx.com</div>
+    <div id="gxMaxLoginStatus" style="position:absolute;left:50%;transform:translateX(-50%);top:72px;display:none;z-index:10000;padding:10px 16px;border:1px solid #344653;border-radius:8px;background:#0b141d;color:#dce7ee;font-size:12px"></div>
+    <div class="gx-max-actions">
+      <button class="gx-max-login" onclick="gxMaxConnect()">Continue with Google</button>
+      <button class="gx-max-sign" onclick="gxMaxConnect()">Sign up with Google</button>
+    </div>
+  </header>
+  <div class="gx-max-tape">
+    <span>VOL <b>50</b> <i class="up">LIVE ▲</i></span>
+    <span>VOL <b>75</b> <i class="up">LIVE ▲</i></span>
+    <span>VOL <b>100</b> <i class="down">LIVE ▼</i></span>
+    <span>VOL <b>150</b> <i class="up">LIVE ▲</i></span>
+    <span>CRASH <b>1000</b> <i class="down">LIVE ▼</i></span>
+    <span>BOOM <b>1000</b> <i class="up">LIVE ▲</i></span>
+    <span>STEP <b>100</b> <i class="up">LIVE ▲</i></span>
+  </div>
+  <div class="gx-max-hero">
+    <div class="gx-max-pill">FREE DERIV BOTS, AUTOMATION, AND TRADING TOOLS IN ONE WORKSPACE</div>
+    <h1>Welcome to <em>GOON FX PRO</em></h1>
+    <p>One large trading workspace for Deriv market analysis, live charts, manual execution, digit analytics, Over / Under, Even / Odd, automation and account management.</p>
+    <div class="gx-max-cta">
+      <button class="gx-max-primary" onclick="gxMaxConnect()">G &nbsp; CONTINUE WITH GOOGLE &nbsp; ›</button>
+      <button class="gx-max-secondary" onclick="gxMaxLaunch()">⚡ &nbsp; OPEN FREE WORKSPACE</button>
+    </div>
+    <div class="gx-max-stats">
+      <div class="gx-max-stat"><b>Live Markets</b><span>Public Deriv market feed</span></div>
+      <div class="gx-max-stat"><b>10 Digit Circles</b><span>Last-digit analytics workspace</span></div>
+      <div class="gx-max-stat"><b>8 Contract Types</b><span>Manual trading tools</span></div>
+      <div class="gx-max-stat"><b>Bot Builder</b><span>Strategy controls + risk limits</span></div>
+    </div>
+    <div class="gx-max-tools">
+      <h2>Everything in one workspace</h2>
+      <div class="gx-max-grid">
+        <div class="gx-max-card"><div class="ico">◒</div><b>Manual Trader</b><p>Live proposal workflow with Rise/Fall, digit contracts and execution controls.</p></div>
+        <div class="gx-max-card"><div class="ico">◉</div><b>Digit Circles</b><p>Ten-digit visual analytics available across the digit-focused tools.</p></div>
+        <div class="gx-max-card"><div class="ico">⚡</div><b>Bot Builder</b><p>Momentum, digit Over/Under and Even/Odd strategy templates with risk limits.</p></div>
+        <div class="gx-max-card"><div class="ico">▥</div><b>Live Charts</b><p>Large candlestick workspace with multiple timeframes and market watch.</p></div>
+      </div>
+    </div>
+    <div class="gx-max-launch"><button onclick="gxMaxLaunch()">ENTER THE GOON FX TRADING WORKSPACE ↓</button></div>
+  </div>
+  <div class="gx-max-terminal-title">
+    <h2>GOON FX PRO Trading Workspace</h2>
+    <span>LIVE PUBLIC DERIV MARKET DATA • TRADING REQUIRES DERIV AUTHORIZATION</span>
+  </div>
+</section>
+
+<header class="header">
+<button class="hamb" id="hamb">☰</button><div class="brand"><div class="mark">G</div><div class="logo">GOON<span>FX</span></div></div>
+<div class="top-center"><div id="publicStatus" class="connection"><i></i><span>MARKET DATA LIVE</span></div></div>
+<div class="header-right"><select id="accountMode" class="acct-select demo"><option value="demo">Demo Account</option><option value="real">Real Account</option></select><div class="header-balance">$ <span id="topBalance">—</span></div><button class="connect-btn" onclick="go('settings')">CONNECT</button></div>
+</header>
+<div class="pro-terminal-bar">
+          <div><b>GOON FX PRO</b><span>THIRD-PARTY DERIV TERMINAL</span></div>
+          <div class="pro-status"><i></i> DERIV API <span>•</span> <b id="proSymbol">—</b> <span>•</span> <b id="proPrice">—</b></div>
+          <div><button onclick="go('manual')">TRADE</button><button onclick="go('ou')">OVER / UNDER</button><button onclick="go('digits')">DIGITS</button><button onclick="go('bot')">BOT</button></div>
+        </div>
+
+</div>
+
+<div id="gxStableNotice" style="margin:0 12px 10px;padding:10px 12px;border:1px solid #243b4a;border-radius:8px;background:#071018;color:#91a1ae;font-size:10px">
+  <b style="color:#fff">GOON FX PRO MAX</b> · Workspace loaded · Public Deriv market feed enabled
+</div>
+<div class="app" id="gxTradingApp"><div class="trade-shortcuts">
+  <button onclick="go('manual')">⚡ MANUAL TRADER</button>
+  <button onclick="go('ou')">↕ OVER / UNDER</button>
+  <button onclick="go('evenodd')">± EVEN / ODD</button>
+  <button onclick="go('rise')">↗ RISE / FALL</button>
+  <button onclick="go('digits')"># DIGITS</button>
+</div>
+
+<aside class="side" id="side"><nav class="nav">
+<div class="nav-title">Terminal</div>
+<button class="active" data-page="dashboard"><span class="ico">◉</span>Dashboard</button><button data-page="markets"><span class="ico">⌘</span>Markets</button><button data-page="manual"><span class="ico">▥</span>Manual Trader</button><button data-page="bulk"><span class="ico">▦</span>Bulk Trader</button><button data-page="bot"><span class="ico">⚡</span>Bot Builder</button><button data-page="freebots"><span class="ico">✦</span>Free Bots</button><button data-page="aibots"><span class="ico">AI</span>AI Bots</button><button data-page="quickbots"><span class="ico">⚡</span>Quick Bots</button><button data-page="signalai"><span class="ico">◈</span>SignalAI</button><button data-page="apex"><span class="ico">▲</span>Apex Bot</button><button data-page="analysis"><span class="ico">⌁</span>Analysis Tool</button><button data-page="automated"><span class="ico">↻</span>Automated</button><button data-page="ou"><span class="ico">◒</span>Over / Under</button><button data-page="digits"><span class="ico">#</span>Digits</button><button data-page="evenodd"><span class="ico">±</span>Even / Odd</button><button data-page="rise"><span class="ico">↗</span>Rise / Fall</button><button data-page="higher"><span class="ico">⇧</span>Higher / Lower</button><button data-page="touch"><span class="ico">◉</span>Touch / No Touch</button><button data-page="matches"><span class="ico">◈</span>Matches / Differs</button>
+<div class="nav-title">Account</div><button data-page="history"><span class="ico">▤</span>Trade History</button><button data-page="account"><span class="ico">◎</span>Account</button><button data-page="settings"><span class="ico">⚙</span>Settings</button>
+</nav><div class="nav-foot"><b>GOON FX PRO</b><p>Live market data is public. Google is the only GOON FX sign-in. Deriv authorization is handled on Deriv's official secure page.</p></div></aside>
+<main>
+<section id="dashboard" class="page active">
+<div class="section-title"><div><h1>Trading Dashboard</h1><p>Professional market overview, live charting and account activity.</p></div><div class="section-actions"><button class="pill" onclick="go('markets')">BROWSE MARKETS</button><button class="pill" onclick="go('settings')">ACCOUNT</button></div></div>
+<div class="kpis"><div class="kpi"><small>Selected Market</small><b id="dashMarket">—</b><span id="dashSymbol">—</span></div><div class="kpi"><small>Live Price</small><b id="dashPrice">—</b><span id="dashPriceTime">Waiting for tick…</span></div><div class="kpi green"><small>Account Balance</small><b id="dashBalance">—</b><span id="dashAccountState">PUBLIC DATA</span></div><div class="kpi"><small>Open Positions</small><b id="openCount">0</b><span id="dashAccountLogin">Not authenticated</span></div><div class="kpi"><small>Markets Available</small><b id="marketCount">—</b><span>Live active symbols</span></div></div>
+<div class="dashboard-grid"><div class="chart-card"><div class="chart-toolbar"><b style="font-size:11px;margin-right:8px;color:#fff">LIVE GRAPH</b><button class="tf active" data-tf="60">1m</button><button class="tf" data-tf="300">5m</button><button class="tf" data-tf="1800">30m</button><button class="tf" data-tf="3600">1H</button><button class="tf" data-tf="14400">4H</button><button class="tf" data-tf="86400">1D</button><button class="pill" onclick="resetChart()">RESET</button><select id="marketTop" class="market-select"></select></div><div id="chart" class="chart" aria-label="Live market chart"><div id="chartStatus" class="chart-status">Connecting to live market data…</div></div><div class="chart-meta"><span>Market: <b id="chartMarket">—</b></span><span id="tickInfo">Public market feed</span></div></div><div class="watch-card"><div class="watch-head"><b>Market Watch</b><span id="watchCount">0 shown</span></div><div id="watchList"></div></div></div>
+<div class="digit-analytics panel">
+<div class="panel-head"><b>NEXT DIGIT ANALYTICS</b><span>Live heuristic · 0–9</span></div>
+<div class="analytics-body">
+  <div class="digit-heat" id="digitHeat"></div>
+  <div class="analytics-side">
+    <div><small>TOP HEURISTIC</small><strong id="topDigit">—</strong></div>
+    <div><small>SECOND</small><strong id="secondDigit">—</strong></div>
+    <div><small>SAMPLE</small><strong id="digitSample">0 ticks</strong></div>
+    <div id="digitSignal" class="status warn">Collecting live ticks…</div>
+  </div>
+</div>
+<div class="analytics-foot">The heat/circle ranking is descriptive only. It cannot guarantee the next digit because Deriv determines the outcome.</div>
+</div><div class="lower-grid"><div class="panel"><div class="panel-head"><b>Open Trades</b><span>Live account positions</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Contract</th><th>Market</th><th>Entry</th><th>Stake</th><th>P/L</th><th>Action</th></tr></thead><tbody id="openBody"><tr><td colspan="6" class="empty">Connect an account to see open trades.</td></tr></tbody></table></div></div><div class="panel"><div class="panel-head"><b>Quick Actions</b><span>Fast access</span></div><div class="quick-grid"><button onclick="go('manual')"><b>Manual Trader</b><span>Direction trade</span></button><button onclick="go('ou')"><b>↕ OVER / UNDER</b><span>Digit barrier</span></button><button onclick="go('digits')"><b>Digits</b><span>Final digit</span></button><button onclick="go('evenodd')"><b>Even / Odd</b><span>Final digit parity</span></button><button onclick="go('markets')"><b>Markets</b><span>Find symbols</span></button></div></div></div>
+</section>
+<section id="bulk" class="page"><div class="gx-contract-workspace gx-bulk-workspace"><div class="gx-contract-panel"><div class="gx-cw-head"><b>BULK CONTRACT CIRCLES</b><span>Select the strategy for every selected market</span></div><div class="gx-circles" id="bulkContractCircles"><button data-ct="CALL" class="gx-circle rise">↗<span>RISE</span></button><button data-ct="PUT" class="gx-circle fall">↘<span>FALL</span></button><button data-ct="DIGITOVER" class="gx-circle">↑<span>OVER</span></button><button data-ct="DIGITUNDER" class="gx-circle">↓<span>UNDER</span></button><button data-ct="DIGITEVEN" class="gx-circle">E<span>EVEN</span></button><button data-ct="DIGITODD" class="gx-circle">O<span>ODD</span></button></div><div class="gx-digit-circles" id="bulkDigitCircles"></div></div><div class="gx-mini-chart-panel"><div class="gx-cw-head"><b>SELECTED MARKET GRAPH</b><span id="bulkGraphSymbol">—</span></div><select id="bulkGraphMarket" class="gx-graph-select"></select><div id="bulkGraph" class="gx-mini-chart"><div class="gx-mini-loading">Select a market to view its live graph…</div></div></div></div>
+<div class="toolpage">
+  <div class="section-title">
+    <div><h1>Bulk Trader</h1><p>Send one reviewed contract setup to multiple live Deriv markets. Select all active markets or choose a filtered group.</p></div>
+    <div class="pill"><span id="bulkSelectedCount">0</span> SELECTED</div>
+  </div>
+  <div class="bulk-grid">
+    <div>
+      <div class="panel">
+        <div class="panel-head"><b>Bulk Contract Setup</b><span>Sequential live proposals + buys</span></div>
+        <div id="bulkStatus" class="status warn" style="margin:10px 0;line-height:1.5">Connect a Demo or Real Deriv account before executing bulk trades.</div>
+        <div class="form-grid">
+          <div class="tool"><label>Contract</label>
+            <select id="bulkType">
+              <option value="CALL">Rise</option><option value="PUT">Fall</option>
+              <option value="DIGITOVER">Over</option><option value="DIGITUNDER">Under</option>
+              <option value="DIGITEVEN">Even</option><option value="DIGITODD">Odd</option>
+              <option value="DIGITMATCHES">Matches</option><option value="DIGITDIFFERS">Differs</option>
+            </select>
+          </div>
+          <div class="tool"><label>Stake per market</label><input id="bulkStake" type="number" min="0.35" step="0.01" value="1"></div>
+          <div class="tool"><label>Duration</label><input id="bulkDur" type="number" min="1" value="5"></div>
+          <div class="tool"><label>Duration Unit</label><select id="bulkUnit"><option value="t">Ticks</option><option value="s">Seconds</option><option value="m">Minutes</option></select></div>
+          <div class="tool" id="bulkBarrierTool"><label>Digit barrier</label><input id="bulkBarrier" type="number" min="0" max="9" value="5"></div>
+          <div class="tool"><label>Delay between markets (ms)</label><input id="bulkDelay" type="number" min="250" step="250" value="750"></div>
+        </div>
+        <div class="actions">
+          <button class="btn green" onclick="executeBulkTrades()">EXECUTE BULK TRADES</button>
+          <button class="btn red" onclick="stopBulkTrades()">STOP BULK</button>
+          <button class="btn ghost" onclick="clearBulkLog()">CLEAR LOG</button>
+        </div>
+        <div class="bulk-summary" id="bulkSummary">
+          <span>Selected: <b id="bulkSummarySelected">0</b></span>
+          <span>Completed: <b id="bulkDone">0</b></span>
+          <span>Skipped/failed: <b id="bulkFailed">0</b></span>
+          <span>Total stake: <b id="bulkTotalStake">0.00</b></span>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:10px">
+        <div class="panel-head"><b>Execution Log</b><span>Each market is proposed and bought separately</span></div>
+        <pre id="bulkLog" class="bulk-log">[GOON FX PRO] Bulk trader ready.\n</pre>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><b>Active Deriv Markets</b><span id="bulkMarketCount">0 active</span></div>
+      <div class="bulk-market-tools">
+        <input id="bulkMarketSearch" placeholder="Filter markets…">
+        <select id="bulkMarketGroup"><option value="all">All markets</option><option value="synthetic">Synthetic</option><option value="forex">Forex</option><option value="crypto">Crypto</option><option value="commodities">Commodities</option><option value="indices">Indices</option><option value="other">Other</option></select>
+      </div>
+      <div class="bulk-select-actions">
+        <button class="btn ghost" onclick="bulkSelectAll(true)">SELECT ALL</button>
+        <button class="btn ghost" onclick="bulkSelectAll(false)">CLEAR ALL</button>
+        <button class="btn ghost" onclick="bulkSelectFiltered()">SELECT FILTERED</button>
+      </div>
+      <div id="bulkMarketList" class="bulk-market-list"></div>
+    </div>
+  </div>
+  <div class="status warn" style="margin-top:10px;line-height:1.55">
+    <b>Important:</b> “All markets” means all active symbols returned by Deriv. A contract type is not guaranteed to be supported by every symbol, so GOON FX tests each market with a live proposal first and skips any unsupported/closed market instead of forcing an invalid trade. Review your selected markets and stake before execution.
+  </div>
+</div>
+</section>
+<section id="markets" class="page"><div class="toolpage"><div class="section-title"><div><h1>Markets</h1><p>Browse the active symbols returned by Deriv.</p></div><div class="pill"><span id="marketResultCount">0</span> MARKETS</div></div><div class="market-controls"><input id="marketSearch" placeholder="Search market name or symbol…"><select id="marketGroup"><option value="all">All markets</option><option value="synthetic">Synthetic</option><option value="forex">Forex</option><option value="crypto">Crypto</option><option value="commodities">Commodities</option><option value="indices">Indices</option><option value="other">Other</option></select></div><div id="marketList" class="market-grid"></div></div></section>
+<section id="manual" class="page"><div class="gx-contract-workspace"><div class="gx-contract-panel"><div class="gx-cw-head"><b>LIVE CONTRACT CIRCLES</b><span>Tap a circle to select the contract</span></div><div class="gx-circles" id="manualContractCircles"><button data-ct="CALL" class="gx-circle rise">↗<span>RISE</span></button><button data-ct="PUT" class="gx-circle fall">↘<span>FALL</span></button><button data-ct="DIGITOVER" class="gx-circle">↑<span>OVER</span></button><button data-ct="DIGITUNDER" class="gx-circle">↓<span>UNDER</span></button><button data-ct="DIGITEVEN" class="gx-circle">E<span>EVEN</span></button><button data-ct="DIGITODD" class="gx-circle">O<span>ODD</span></button></div><div class="gx-digit-circles" id="manualDigitCircles"></div><div class="gx-tick-tape" id="manualTickTape">
+  <div class="gx-tape-head">
+    <div><b>LIVE TICKS</b><span id="gxTickMarket">—</span></div>
+    <div><b id="gxNextDigit">—</b><span>NEXT DIGIT EST.</span></div>
+  </div>
+  <div class="gx-tape-strip" id="gxTickStrip"><span class="gx-tape-empty">Waiting for live ticks…</span></div>
+  <div class="gx-tape-stats">
+    <span>LAST <b id="gxLastDigit">—</b></span>
+    <span>COUNT <b id="gxTickCount">0</b></span>
+    <span>HOT <b id="gxHotDigits">—</b></span>
+    <span>NOTE <b id="gxPredictionNote">Collecting data</b></span>
+  </div>
+</div></div><div class="gx-mini-chart-panel"><div class="gx-cw-head"><b>LIVE GRAPH</b><span id="manualGraphSymbol">—</span></div><div id="manualGraph" class="gx-mini-chart"><div class="gx-mini-loading">Waiting for live market data…</div></div></div></div><div class="toolpage"><div class="section-title"><div><h1>Manual Trader</h1><p>Fast contract workspace inspired by the trading layout in your reference image.</p></div><div class="pill"><span id="manualConnectionPill">PUBLIC FEED</span></div></div><div class="manual-shell"><div><div class="panel"><div class="panel-head"><b>Contract Setup</b><span>Live proposal before purchase</span></div><div id="executionGuide" class="status warn" style="margin:10px 0;line-height:1.5">
+Execution: connect Demo/Real Deriv account → choose contract → GET PROPOSAL → review payout → BUY CONTRACT.
+</div><div class="manual-tabs" id="manualTabs"><button class="active" data-manual="CALL">↗ RISE / FALL</button><button data-manual="DIGITOVER">↕ OVER / UNDER</button><button data-manual="DIGITEVEN">Even / Odd</button><button data-manual="DIGITMATCHES">Matches / Differs</button></div><div class="form-grid"><div class="tool"><label>Market</label><select class="market" id="manualMarket"></select></div><div class="tool"><label>Contract</label><select id="manualType"><option value="CALL">Rise</option><option value="PUT">Fall</option><option value="DIGITOVER">Over</option><option value="DIGITUNDER">Under</option><option value="DIGITEVEN">Even</option><option value="DIGITODD">Odd</option><option value="DIGITMATCHES">Matches</option><option value="DIGITDIFFERS">Differs</option></select></div><div class="tool"><label>Stake</label><input id="manualStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration</label><input id="manualDur" type="number" min="1" value="5"></div><div class="tool"><label>Duration Unit</label><select id="manualUnit"><option value="t">Ticks</option><option value="s">Seconds</option><option value="m">Minutes</option></select></div><div class="tool" id="manualBarrierTool"><label>Last Digit / Barrier</label><input id="manualBarrier" type="number" min="0" max="9" value="5"></div></div><div class="digit-grid" id="manualDigits"></div><div class="actions"><button class="btn" onclick="getProposal('manual')">GET LIVE PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button><button class="btn ghost" onclick="clearManualProposal()">CLEAR QUOTE</button><button class="btn ghost" onclick="go('bot')">OPEN BOT BUILDER</button></div><div id="manualStatus" class="status">Waiting for a live proposal.</div></div></div><div class="manual-summary panel" style="margin-bottom:10px"><div class="panel-head"><b>Manual Trading Controls</b><span>Review before purchase</span></div><div style="padding:11px;font-size:10px;color:var(--muted);line-height:1.55"><b style="color:#fff">Options:</b> Rise / Fall · Over / Under · Even / Odd · Matches / Differs.<br><b style="color:#fff">Flow:</b> Market → Contract → Stake/Duration → Live Proposal → Review → Buy.<br><b style="color:#fff">Account:</b> Demo or Real Deriv account must be authenticated before buying.</div></div><div class="live-ticket"><div class="ticket-title">Live Ticket</div><div class="ticket-section"><small>Market</small><b id="manualTicketMarket">—</b></div><div class="ticket-section"><small>Ticks / Duration</small><input class="tick-slider" id="manualTickRange" type="range" min="1" max="20" value="5"><div style="text-align:center;font-weight:900;margin-top:5px"><span id="manualTickValue">5</span> Ticks</div></div><div class="ticket-section"><small>Last Digit Prediction</small><div class="digit-grid" id="ticketDigits"></div></div><div class="ticket-section"><small>Stake</small><div class="stake-row"><button onclick="adjustManualStake(-1)">−</button><b id="ticketStakeValue">10</b><button onclick="adjustManualStake(1)">+</button></div></div><div class="ticket-section"><small>Payout</small><div class="payout-big"><span id="ticketPayoutCurrency">USD</span> <span id="ticketPayout">—</span></div></div><div class="ticket-section"><div class="trade-buttons"><button class="buy-rise" onclick="setManualContract('CALL');getProposal('manual')">RISE</button><button class="buy-fall" onclick="setManualContract('PUT');getProposal('manual')">FALL</button></div></div></div></div></div></section>
+<section id="ou" class="page"><div class="gx-contract-workspace"><div class="gx-contract-panel"><div class="gx-cw-head"><b>OVER / UNDER CIRCLES</b><span>Choose barrier and direction</span></div><div class="gx-circles"><button class="gx-circle" data-target="ouType" data-val="DIGITOVER">↑<span>OVER</span></button><button class="gx-circle" data-target="ouType" data-val="DIGITUNDER">↓<span>UNDER</span></button></div><div class="gx-live-note"><b>LIVE DIGIT PROBABILITY</b> · Percentages are calculated from the latest Deriv tick history for the selected market.</div><div class="gx-digit-circles" data-target="ouBarrier"></div></div><div class="gx-mini-chart-panel"><div class="gx-cw-head"><b>LIVE GRAPH</b><span id="ouGraphSymbol">—</span></div><div id="ouGraph" class="gx-mini-chart"><div class="gx-mini-loading">Loading live graph…</div></div></div></div><div class="toolpage"><h2>Over / Under</h2><p>Final digit barrier contract workspace.</p><div class="form-grid"><div class="tool"><label>Market</label><select id="ouMarket" class="market"></select></div><div class="tool"><label>Contract</label><select id="ouType"><option value="DIGITOVER">Over</option><option value="DIGITUNDER">Under</option><option value="DIGITEVEN">Even</option><option value="DIGITODD">Odd</option></select></div><div class="tool"><label>Barrier / Digit</label><input id="ouBarrier" type="number" min="0" max="9" value="5"></div><div class="tool"><label>Stake</label><input id="ouStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration</label><input id="ouDur" type="number" min="1" value="5"></div><div class="tool"><label>Unit</label><select id="ouUnit"><option value="t">Ticks</option><option value="s">Seconds</option></select></div></div><div class="actions"><button class="btn" onclick="getProposal('ou')">GET LIVE PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY</button></div><div id="ouStatus" class="status">Set the barrier and request a live quote.</div><div class="quote-box"><div class="quote-line"><span>Selected</span><b id="ouSelected">OVER</b></div><div class="quote-line"><span>Payout</span><b id="ouPayout">—</b></div><div class="quote-line"><span>Profit</span><b class="profit" id="ouProfit">—</b></div></div></div></section>
+<section id="digits" class="page"><div class="toolpage"><h2>Digits</h2><p>Matches, differs, over and under final-digit contracts.</p><div class="form-grid"><div class="tool"><label>Market</label><select class="market"></select></div><div class="tool"><label>Contract</label><select id="digitType"><option value="DIGITMATCH">Matches</option><option value="DIGITDIFF">Differs</option><option value="DIGITOVER">Over</option><option value="DIGITUNDER">Under</option></select></div><div class="tool"><label>Digit</label><input id="digitBarrier" type="number" min="0" max="9" value="5"></div><div class="tool"><label>Stake</label><input id="digitStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration (ticks)</label><input id="digitDur" type="number" min="1" value="5"></div></div><div class="actions"><button class="btn" onclick="getProposal('digits')">GET PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button></div><div id="digitsStatus" class="status">Waiting for a quote.</div></div></section>
+<section id="evenodd" class="page"><div class="gx-contract-workspace"><div class="gx-contract-panel"><div class="gx-cw-head"><b>EVEN / ODD CIRCLES</b><span>Choose the final-digit direction</span></div><div class="gx-circles"><button class="gx-circle" data-target="eoType" data-val="DIGITEVEN">E<span>EVEN</span></button><button class="gx-circle" data-target="eoType" data-val="DIGITODD">O<span>ODD</span></button></div><div class="gx-live-note"><b>LIVE DIGIT PROBABILITY</b> · Percentages are calculated from the latest Deriv tick history for the selected market.</div><div class="gx-digit-circles" data-target="eoType"></div></div><div class="gx-mini-chart-panel"><div class="gx-cw-head"><b>LIVE GRAPH</b><span id="eoGraphSymbol">—</span></div><div id="eoGraph" class="gx-mini-chart"><div class="gx-mini-loading">Loading live graph…</div></div></div></div><div class="toolpage"><h2>Even / Odd</h2><p>Predict whether the final digit of the next tick is even or odd.</p><div class="form-grid"><div class="tool"><label>Market</label><select id="eoMarket" class="market"></select></div><div class="tool"><label>Contract</label><select id="eoType"><option value="DIGITEVEN">Even</option><option value="DIGITODD">Odd</option></select></div><div class="tool"><label>Stake</label><input id="eoStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration (ticks)</label><input id="eoDur" type="number" min="1" value="5"></div></div><div class="actions"><button class="btn" onclick="getProposal('evenodd')">GET LIVE PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button></div><div id="evenoddStatus" class="status">Waiting for a live quote.</div><div class="quote-box"><div class="quote-line"><span>Selected</span><b id="eoSelected">EVEN</b></div><div class="quote-line"><span>Payout</span><b id="eoPayout">—</b></div><div class="quote-line"><span>Profit</span><b class="profit" id="eoProfit">—</b></div></div></div></section>
+<section id="rise" class="page"><div class="gx-contract-workspace"><div class="gx-contract-panel"><div class="gx-cw-head"><b>RISE / FALL CIRCLES</b><span>Choose direction</span></div><div class="gx-circles"><button class="gx-circle rise" data-target="riseType" data-val="CALL">↗<span>RISE</span></button><button class="gx-circle fall" data-target="riseType" data-val="PUT">↘<span>FALL</span></button></div></div><div class="gx-mini-chart-panel"><div class="gx-cw-head"><b>LIVE GRAPH</b><span id="riseGraphSymbol">—</span></div><div id="riseGraph" class="gx-mini-chart"><div class="gx-mini-loading">Loading live graph…</div></div></div></div><div class="toolpage"><h2>Rise / Fall</h2><p>Directional contract workspace.</p><div class="form-grid"><div class="tool"><label>Market</label><select id="riseMarket" class="market"></select></div><div class="tool"><label>Direction</label><select id="riseType"><option value="CALL">Rise</option><option value="PUT">Fall</option></select></div><div class="tool"><label>Stake</label><input id="riseStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration</label><input id="riseDur" type="number" min="1" value="5"></div><div class="tool"><label>Unit</label><select id="riseUnit"><option value="t">Ticks</option><option value="s">Seconds</option></select></div></div><div class="actions"><button class="btn" onclick="getProposal('rise')">GET PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button></div><div id="riseStatus" class="status">Waiting for a quote.</div></div></section>
+<section id="higher" class="page"><div class="toolpage"><h2>Higher / Lower</h2><p>Barrier-based directional contract workspace.</p><div class="form-grid"><div class="tool"><label>Market</label><select class="market"></select></div><div class="tool"><label>Contract</label><select id="higherType"><option value="CALLE">Higher</option><option value="PUTE">Lower</option></select></div><div class="tool"><label>Relative Barrier</label><input id="higherBarrier" value="+0.10"></div><div class="tool"><label>Stake</label><input id="higherStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration (ticks)</label><input id="higherDur" type="number" min="1" value="5"></div></div><div class="actions"><button class="btn" onclick="getProposal('higher')">GET PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button></div><div id="higherStatus" class="status">Waiting for a quote.</div></div></section>
+<section id="touch" class="page"><div class="toolpage"><h2>Touch / No Touch</h2><p>Barrier touch contract workspace.</p><div class="form-grid"><div class="tool"><label>Market</label><select class="market"></select></div><div class="tool"><label>Contract</label><select id="touchType"><option value="ONETOUCH">Touch</option><option value="NOTOUCH">No Touch</option></select></div><div class="tool"><label>Relative Barrier</label><input id="touchBarrier" value="+0.10"></div><div class="tool"><label>Stake</label><input id="touchStake" type="number" min="0.35" step="0.01" value="10"></div><div class="tool"><label>Duration (ticks)</label><input id="touchDur" type="number" min="1" value="5"></div></div><div class="actions"><button class="btn" onclick="getProposal('touch')">GET PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button></div><div id="touchStatus" class="status">Waiting for a quote.</div></div></section>
+<section id="matches" class="page"><div class="toolpage"><h2>Matches / Differs</h2><p>Final-digit matching workspace.</p><div class="form-grid"><div class="tool"><label>Market</label><select class="market"></select></div><div class="tool"><label>Contract</label><select id="matchType"><option value="DIGITMATCH">Matches</option><option value="DIGITDIFF">Differs</option></select></div><div class="tool"><label>Digit</label><input id="matchBarrier" type="number" min="0" max="9" value="5"></div><div class="tool"><label>Stake</label><input id="matchStake" type="number" min="0.35" step="0.01" value="10"></div></div><div class="actions"><button class="btn" onclick="getProposal('matches')">GET PROPOSAL</button><button class="btn green" onclick="buyProposal()">BUY CONTRACT</button></div><div id="matchesStatus" class="status">Waiting for a quote.</div></div></section>
+
+<section id="freebots" class="page"><div class="toolpage"><div class="section-title"><div><h1>Free Bots</h1><p>Free strategy launchpad for your GOON FX workspace.</p></div><div class="pill">FREE ACCESS</div></div><div class="gx-bot-grid">
+<div class="gx-bot-card"><div><h3>Vertex Digits</h3><p>Digit-focused strategy workspace for Over, Under, Even and Odd.</p></div><button class="bot-btn" onclick="go('digits')">OPEN VERTEX DIGITS</button></div>
+<div class="gx-bot-card"><div><h3>Quick Bots</h3><p>Fast preset workflows for rapid contract setup.</p></div><button class="bot-btn" onclick="go('quickbots')">OPEN QUICK BOTS</button></div>
+<div class="gx-bot-card"><div><h3>SignalAI</h3><p>Market signal dashboard using live market data available in GOON FX.</p></div><button class="bot-btn" onclick="go('signalai')">OPEN SIGNALAI</button></div>
+</div></div></section>
+<section id="aibots" class="page"><div class="toolpage"><div class="section-title"><div><h1>AI Bots</h1><p>AI-assisted strategy controls and market analysis.</p></div></div><div class="gx-bot-grid">
+<div class="gx-bot-card"><div><h3>AI Market Scanner</h3><p>Review live markets and identify candidate setups before trading.</p></div><button class="bot-btn" onclick="go('analysis')">OPEN ANALYSIS</button></div>
+<div class="gx-bot-card"><div><h3>AI Contract Assistant</h3><p>Open the contract workspace and choose a live Deriv market.</p></div><button class="bot-btn" onclick="go('manual')">OPEN MANUAL TRADER</button></div>
+</div></div></section>
+<section id="quickbots" class="page"><div class="toolpage"><div class="section-title"><div><h1>Quick Bots</h1><p>One-click access to common GOON FX workflows.</p></div></div><div class="gx-bot-grid">
+<div class="gx-bot-card"><div><h3>Digit Quick Bot</h3><p>Open the digit contract controls.</p></div><button class="bot-btn" onclick="go('digits')">START</button></div>
+<div class="gx-bot-card"><div><h3>Over / Under Quick Bot</h3><p>Use the live bar controls for Over and Under.</p></div><button class="bot-btn" onclick="go('ou')">START</button></div>
+<div class="gx-bot-card"><div><h3>Rise / Fall Quick Bot</h3><p>Use the live Rise and Fall contract controls.</p></div><button class="bot-btn" onclick="go('rise')">START</button></div>
+</div></div></section>
+<section id="signalai" class="page"><div class="toolpage"><div class="section-title"><div><h1>SignalAI</h1><p>Live-data signal workspace. Signals are informational and do not guarantee profit.</p></div><div class="pill">LIVE DATA</div></div><div class="panel" style="padding:18px"><h3>Signal Workspace</h3><p style="color:#8e9ba7">Choose a market from Markets, then use the live chart and contract bars to evaluate the setup.</p><div class="quick-grid"><button onclick="go('markets')"><b>Markets</b><span>Choose symbol</span></button><button onclick="go('manual')"><b>Manual Trader</b><span>Live chart + contracts</span></button><button onclick="go('ou')"><b>Over / Under</b><span>Digit analysis</span></button></div></div></div></section>
+<section id="apex" class="page"><div class="toolpage"><div class="section-title"><div><h1>Apex Bot</h1><p>Advanced preset workspace for disciplined execution.</p></div></div><div class="gx-bot-grid">
+<div class="gx-bot-card"><div><h3>Apex Setup</h3><p>Configure market, contract and stake in the manual trader.</p></div><button class="bot-btn" onclick="go('manual')">OPEN APEX WORKSPACE</button></div>
+<div class="gx-bot-card"><div><h3>Apex Bulk</h3><p>Review multiple selected markets in the bulk trader.</p></div><button class="bot-btn" onclick="go('bulk')">OPEN BULK TRADER</button></div>
+</div></div></section>
+<section id="analysis" class="page"><div class="toolpage"><div class="section-title"><div><h1>Analysis Tool</h1><p>Live chart and market-analysis workspace.</p></div></div><div class="panel" style="padding:18px"><h3>Market Analysis</h3><p style="color:#8e9ba7">Use the live Deriv chart, current ticks and contract controls together. Analysis does not guarantee an outcome.</p><button class="pill" onclick="go('markets')">SELECT MARKET</button></div></div></section>
+<section id="automated" class="page"><div class="toolpage"><div class="section-title"><div><h1>Automated</h1><p>Automation workspace for your configured strategies.</p></div><div class="pill">CONTROLLED EXECUTION</div></div><div class="panel" style="padding:18px"><h3>Automation</h3><p style="color:#8e9ba7">Connect a Deriv account, select a strategy and review every proposal before enabling automated execution.</p><div class="quick-grid"><button onclick="go('bot')"><b>Bot Builder</b><span>Configure strategy</span></button><button onclick="go('bulk')"><b>Bulk Trader</b><span>Multi-market execution</span></button><button onclick="go('account')"><b>Account</b><span>Connection status</span></button></div></div></div></section>
+<section id="history" class="page"><div class="toolpage"><div class="section-title"><div><h1>Trade History</h1><p>Closed contracts returned by the authenticated account.</p></div><button class="btn ghost" onclick="loadHistory()">REFRESH</button></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Time</th><th>Market</th><th>Contract</th><th>Buy Price</th><th>Sell Price</th><th>Profit/Loss</th><th>Status</th></tr></thead><tbody id="historyBody"><tr><td colspan="7" class="empty">Connect an account to load trade history.</td></tr></tbody></table></div></div></section>
+<section id="bot" class="page"><div class="toolpage"><div class="section-title"><div><h1>Bot Builder</h1><p>Build a simple rule-based strategy from live ticks and run it in demo or real mode after account authorization.</p></div><div class="pill">LIVE STRATEGY ENGINE</div></div><div class="bot-layout"><div class="bot-block"><h3>Strategy</h3><div class="bot-row"><div><label>Market</label><select id="botMarket" class="market"></select></div><div><label>Strategy</label><select id="botStrategy"><option value="momentum">Momentum — last tick direction</option><option value="digit-over">Digit over barrier</option><option value="digit-under">Digit under barrier</option><option value="even-odd">Even / Odd</option></select></div></div><div class="bot-row"><div><label>Stake</label><input id="botStake" type="number" min="0.35" step="0.01" value="1"></div><div><label>Duration (ticks)</label><input id="botDur" type="number" min="1" max="20" value="5"></div></div><div class="bot-row"><div><label>Barrier / Digit</label><input id="botBarrier" type="number" min="0" max="9" value="5"></div><div><label>Max trades</label><input id="botMaxTrades" type="number" min="1" value="5"></div></div><div class="bot-row"><div><label>Stop loss</label><input id="botStopLoss" type="number" min="0" step="0.01" value="10"></div><div><label>Take profit</label><input id="botTakeProfit" type="number" min="0" step="0.01" value="10"></div></div><div class="actions"><button class="btn green" onclick="startBot()">START BOT</button><button class="btn red" onclick="stopBot()">STOP BOT</button><button class="btn ghost" onclick="clearBotLog()">CLEAR LOG</button></div><div id="botStatus" class="status warn">Bot stopped. Demo account is recommended while testing.</div></div><div class="bot-block"><div class="bot-state"><div><b id="botStateText">STOPPED</b><div style="font-size:9px;color:var(--muted);margin-top:3px">Automated execution status</div></div><span class="bot-dot" id="botDot"></span></div><div class="bot-log" id="botLog">[GOON FX PRO] Bot engine ready.\n[INFO] Connect a Deriv account before live execution.\n</div><div class="status warn">Live trading can lose money. The bot only sends a contract after receiving a fresh proposal and requires an authenticated Deriv session.</div></div></div></div></section><section id="account" class="page"><div class="toolpage"><h2>Account</h2><p>Live session, balance and account state.</p><div class="account-hero"><div class="account-stat"><small>DERIV CONNECTION</small><b id="accountLabel">Not connected</b></div><div class="account-stat"><small>BALANCE</small><b id="accountBalance">—</b></div><div class="account-stat"><small>SESSION</small><b id="accountSession">Public</b></div></div><div class="actions"><button class="btn" onclick="go('settings')">ACCOUNT CONNECTION</button><button class="btn ghost" onclick="refreshAccount()">REFRESH ACCOUNT</button></div><div id="accountStatus" class="status">Public market data mode. Trading is locked until an account is connected.</div></div></section>
+<section id="settings" class="page"><div class="panel" style="margin-bottom:10px;border-color:#7a1f2f">
+<div class="panel-head"><b>ONE-CLICK CONNECTION</b><span>GOON FX</span></div>
+<div style="padding:12px;color:var(--muted);font-size:10px;line-height:1.55">
+<b style="color:#fff">GOON FX login:</b> Google only — GOON FX never asks for or stores your Google password.<br>
+<b style="color:#fff">Trading:</b> after Google sign-in, authorize your Deriv account on Deriv's official secure page.
+</div></div><div class="toolpage"><h2>Connect Accounts</h2><p>Use Google to enter GOON FX. When you enable trading, you are redirected to Deriv's official authorization page. GOON FX never receives your Google or Deriv password.</p><div class="google-login">
+<b>GOON FX ACCOUNT</b>
+<p>Sign in directly with Google. Your Google Client ID is built into GOON FX — you do not need to enter or configure it here.</p>
+<div class="google-row">
+  <div class="google-badge">G</div>
+  <button class="btn" id="googleBtn" onclick="startGoogleLogin()">CONTINUE WITH GOOGLE</button>
+  <div class="google-user" id="googleUser"><img id="googleAvatar"><div><b id="googleName">—</b><div id="googleEmail" style="font-size:9px;color:var(--muted)">—</div></div></div>
+</div>
+<div id="googleDirectStatus" class="status ok" style="margin-top:10px">Google sign-in is optional. For the smoothest experience, open GOON FX at https://goonfx.com; trading connects directly through Deriv OAuth.</div><div id="googleLocalOpen" style="margin-top:8px;display:none"><a href="https://goonfx.com" style="display:inline-block;padding:9px 12px;border-radius:7px;background:#18d77a;color:#031008;font-weight:800;text-decoration:none">OPEN GOON FX ONLINE</a></div>
+</div></div><div class="oauth"><b>DERIV ACCOUNT</b><p>After Google sign-in, choose Demo or Real and continue to Deriv's official authorization page. Enter your credentials only on Deriv. GOON FX receives authorization, not your password.</p><div class="oauth-buttons"><button onclick="startOAuth('demo')"><strong>Connect Demo Account</strong><span>Virtual funds / practice</span></button><button onclick="startOAuth('real')"><strong>Connect Real Account</strong><span>Live funds / real trading</span></button></div><div class="status" style="margin-top:10px"><b>Registered redirect URI:</b> https://goonfx.com &nbsp; <b>Scope:</b> trade</div></div><div class="connected"><div><small>DERIV CONNECTION</small><b id="oauthAccount">Not connected</b></div><div><small>AUTHORIZATION</small><b id="oauthAuthState">Not authorized</b></div><div><small>BALANCE</small><b id="oauthBal">—</b></div><button class="btn red" onclick="disconnectAccount()">DISCONNECT</button></div><div class="security"><b>Connection:</b> Google is optional for GOON FX identity. Deriv authorization is the only requirement for trading. <b>Privacy:</b> GOON FX does not ask for, store, or display Google or Deriv passwords. Google handles GOON FX sign-in, while Deriv handles trading authorization. Credentials are entered only on the provider's official secure pages.</div><div id="settingsStatus" class="status warn">Public market data is available. Connect Google and/or Deriv to enable account features.</div></div></section>
+</main>
+<aside class="right-ticket"><div class="ticket-head"><b>Quick Trader</b><span>Live proposal → review → buy</span></div><div class="ticket-body"><div class="field"><label>MARKET</label><select id="ticketMarket"></select></div><div class="field"><label>DIRECTION</label><select id="ticketType"><option value="CALL">Rise</option><option value="PUT">Fall</option></select></div><div class="two"><div class="field"><label>DURATION</label><input id="ticketDur" type="number" min="1" value="5"></div><div class="field"><label>UNIT</label><select id="ticketUnit"><option value="t">Ticks</option><option value="s">Seconds</option></select></div></div><div class="field"><label>STAKE</label><input id="ticketStake" type="number" min="0.35" step="0.01" value="10"></div><div class="quote-box"><div class="quote-line"><span>Potential Payout</span><b id="ticketPayout">—</b></div><div class="quote-line"><span>Potential Profit</span><b class="profit" id="ticketProfit">—</b></div></div><div class="trade-buttons"><button class="buy-rise" onclick="ticketQuote('CALL')">BUY RISE</button><button class="buy-fall" onclick="ticketQuote('PUT')">BUY FALL</button></div><div id="ticketStatus" class="status">Get a live quote first. Buying requires an authenticated account.</div></div></aside>
+</div>
+</div></div><div id="toast" class="toast"></div>
+<div id="modal" class="modal-backdrop hidden"><div class="modal"><button class="close" onclick="closeModal()">×</button><h3 id="modalTitle">GOON FX</h3><p id="modalText"></p><div class="actions"><button class="btn" onclick="closeModal()">CLOSE</button></div></div></div>
+<script>
+/* ===== CONFIG =====
+   Set these after registering a Deriv OAuth app and deploying the worker.
+   Do not put CLIENT_SECRET in this HTML. */
+const GOOGLE_CLIENT_ID='568319331917-ps2oelnblj9ahq3ou8kvoih1mcrpt0nk.apps.googleusercontent.com';
+const CONFIG={
+  OAUTH_CLIENT_ID:'34b2ctEChXoL5t579q8pB',
+  OAUTH_GATEWAY:'https://goonfx.com',
+  REDIRECT_URI:'https://goonfx.com',
+  PUBLIC_WS:'wss://api.derivws.com/trading/v1/options/ws/public',
+  API_BASE:'https://api.derivws.com'
+};
+let publicWS=null,tradeWS=null,chart=null,series=null,current='',timeframe=60,price=null,bars={},markets=[],lastProposal=null,reqSeq=100,reconnectTimer=null,account=null,accountType='demo',authenticated=false,watchTimer=null;
+const $=id=>document.getElementById(id);
+function checkGoogleOrigin(){
+  if(location.protocol==='file:'){
+    const s=$('googleDirectStatus');
+    const msg='This copy is being opened as a local file (file://). Google OAuth will be blocked here. Use https://goonfx.com for production, or localhost for development.';
+    if(s){s.textContent=msg;s.className='status bad'} const l=$('googleLocalOpen'); if(l)l.style.display='block';
+    const b=$('googleBtn');
+    if(b)b.title='Open GOON FX on HTTPS to use Google Sign-In';
+  }
+}
+ const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function toast(msg,type=''){const t=$('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.className='toast',3200)}
+function setStatus(msg,type=''){['settingsStatus','accountStatus','ticketStatus','manualStatus','ouStatus','digitsStatus','riseStatus','higherStatus','touchStatus','matchesStatus'].forEach(id=>{const e=$(id);if(e){e.textContent=msg;e.className='status '+type}})}
+function go(page){if(!document.getElementById(page))return;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===page));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('side').classList.remove('open');if(page==='markets')renderMarkets();if(page==='history')loadHistory()}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();go(b.dataset.page)}));document.addEventListener('click',e=>{const b=e.target.closest('.nav button[data-page]');if(b){e.preventDefault();go(b.dataset.page)}});if($('hamb'))$('hamb').addEventListener('click',e=>{e.preventDefault();$('side').classList.toggle('open')});if($('accountMode'))$('accountMode').onchange=e=>switchAccountMode(e.target.value);
+function classify(m){const s=(m.symbol||'').toLowerCase(),n=(m.display_name||'').toLowerCase();if(s.startsWith('r_')||s.startsWith('1hz')||/volatility|boom|crash|step|jump|drift/.test(n))return'synthetic';if(s.startsWith('frx')||/forex|eur\/|gbp\/|usd\/|jpy|aud\/|cad\/|chf\//.test(n))return'forex';if(s.startsWith('cry')||n.includes('crypto'))return'crypto';if(/gold|silver|oil|commodity/.test(n))return'commodities';if(/index|wall street|nasdaq|s&p|dax|ftse|nikkei/.test(n))return'indices';return'other'}
+function setMarkets(list){markets=list.map(m=>({symbol:m.symbol||m.underlying_symbol,display_name:m.display_name||m.underlying_symbol_name||m.symbol||m.underlying_symbol,...m})).filter(m=>m&&m.symbol).sort((a,b)=>(a.display_name||a.symbol).localeCompare(b.display_name||b.symbol));$('marketCount').textContent=markets.length;$('marketResultCount').textContent=markets.length;if(!current)current=(markets.find(m=>m.symbol==='R_100')||markets[0])?.symbol||'';const opts=markets.map(m=>`<option value="${esc(m.symbol)}">${esc(m.display_name||m.symbol)}</option>`).join('');document.querySelectorAll('.market').forEach(s=>{s.innerHTML=opts;if([...s.options].some(o=>o.value===current))s.value=current});['marketTop','ticketMarket'].forEach(id=>{if($(id)){$(id).innerHTML=opts;$(id).value=current}});renderMarkets();renderWatch();updateMarketUI();if(current)subscribeMarket()}
+function updateMarketUI(){const m=markets.find(x=>x.symbol===current);$('dashMarket').textContent=m?.display_name||'—';$('dashSymbol').textContent=m?.symbol||'—';$('chartMarket').textContent=m?.display_name||current||'—';if(price!=null)$('dashPrice').textContent=Number(price).toFixed(5);renderWatch()}
+function renderMarkets(){const q=($('marketSearch')?.value||'').trim().toLowerCase(),g=$('marketGroup')?.value||'all';const f=markets.filter(m=>(g==='all'||classify(m)===g)&&(`${m.display_name||''} ${m.symbol||''}`.toLowerCase().includes(q)));$('marketResultCount').textContent=f.length;$('marketList').innerHTML=f.map(m=>`<div class="market-card"><b>${esc(m.display_name||m.symbol)}</b><small>${esc(m.symbol)} · ${classify(m)}</small><button onclick="chooseMarket('${esc(m.symbol)}')">USE MARKET</button></div>`).join('')||'<div class="empty">No markets match your search.</div>'}
+$('marketSearch').oninput=renderMarkets;$('marketGroup').onchange=renderMarkets;
+function chooseMarket(sym){if(window.gxResetTickTape)window.gxResetTickTape(sym);current=sym;document.querySelectorAll('.market').forEach(s=>{if([...s.options].some(o=>o.value===sym))s.value=sym});$('marketTop').value=sym;$('ticketMarket').value=sym;go('dashboard');subscribeMarket()}
+function renderWatch(){const list=markets.slice(0,9);$('watchCount').textContent=list.length+' shown';$('watchList').innerHTML=list.map(m=>{const sel=m.symbol===current;return`<div class="watch-row ${sel?'active':''}" onclick="chooseMarket('${esc(m.symbol)}')"><div class="watch-top"><span class="watch-name">${esc(m.display_name||m.symbol)}</span><span class="watch-price">${sel&&price!=null?Number(price).toFixed(5):'—'}</span></div><div class="watch-bottom"><span>${esc(m.symbol)}</span><span class="${sel?'watch-live':''}">${sel?'LIVE':'WATCH'}</span></div></div>`}).join('')}
+function chartStatus(msg,type=''){const e=$('chartStatus');if(!e)return;e.textContent=msg;e.className='chart-status '+type}
+function initChart(){
+  const el=$('chart');
+  if(!el)return;
+  if(!window.LightweightCharts){
+      const c=document.createElement('canvas'); c.id='fallbackChartCanvas'; c.width=1200; c.height=500;
+      c.style.width='100%'; c.style.height='100%'; el.innerHTML=''; el.appendChild(c);
+      chartStatus('Live chart library unavailable — showing native live price chart.','');
+      window._fallbackDraw=function(){
+        const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+        const vals=Object.values(bars).sort((a,b)=>a.time-b.time).map(x=>Number(x.close)).filter(Number.isFinite);
+        if(vals.length<2)return;
+        const min=Math.min(...vals),max=Math.max(...vals),span=max-min||1;
+        ctx.beginPath();
+        vals.forEach((v,i)=>{const x=i/(vals.length-1)*c.width,y=c.height-30-(v-min)/span*(c.height-60);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
+        ctx.strokeStyle='#6fd3ff';ctx.lineWidth=2;ctx.stroke();
+      };
+      return;
+    }
+  try{
+    chart=LightweightCharts.createChart(el,{
+      width:Math.max(300,el.clientWidth),height:Math.max(300,el.clientHeight),
+      layout:{background:{color:'#080e15'},textColor:'#7f8d9a'},
+      grid:{vertLines:{color:'#111b24'},horzLines:{color:'#111b24'}},
+      crosshair:{mode:1},
+      rightPriceScale:{borderColor:'#273541',autoScale:true},
+      timeScale:{borderColor:'#273541',timeVisible:true,secondsVisible:false,rightOffset:3,barSpacing:7}
+    });
+    series=chart.addCandlestickSeries({
+      upColor:'#18d77a',downColor:'#ef3348',
+      wickUpColor:'#18d77a',wickDownColor:'#ef3348',
+      borderUpColor:'#18d77a',borderDownColor:'#ef3348',borderVisible:false
+    });
+    const resize=()=>{
+      if(!chart)return;
+      const w=Math.max(280,el.clientWidth),h=Math.max(280,el.clientHeight);
+      chart.applyOptions({width:w,height:h});
+    };
+    window.addEventListener('resize',resize);
+    if(window.ResizeObserver){new ResizeObserver(resize).observe(el)}
+    requestAnimationFrame(resize);
+    setTimeout(resize,150);
+    chartStatus('','ok');
+  }catch(e){console.error(e);chartStatus('Unable to initialize chart.','bad')}
+}
+function send(o){if(publicWS?.readyState===1)publicWS.send(JSON.stringify(o))}
+function connectPublic(){clearTimeout(reconnectTimer);if(publicWS?.readyState===1)return;setPublicStatus('Connecting…',true);publicWS=new WebSocket(CONFIG.PUBLIC_WS);publicWS.onopen=()=>{setPublicStatus('MARKET DATA LIVE',true);send({active_symbols:'brief',product_type:'basic',req_id:1});if(current)subscribeMarket()};publicWS.onmessage=e=>handlePublic(JSON.parse(e.data));publicWS.onerror=()=>{setPublicStatus('MARKET DATA ERROR',false);chartStatus('Market data connection failed. Retrying…','bad')};publicWS.onclose=()=>{setPublicStatus('RECONNECTING…',false);chartStatus('Reconnecting to market data…','bad');reconnectTimer=setTimeout(connectPublic,3000)}}
+function setPublicStatus(text,on){$('publicStatus').className='connection '+(on?'':'off');$('publicStatus').querySelector('span').textContent=text}
+function subscribeMarket(){
+  if(!current||publicWS?.readyState!==1){chartStatus('Waiting for market data connection…');return}
+  bars={};price=null;series?.setData([]);chartStatus('Loading '+current+' chart…');
+  send({forget_all:'ticks'});
+  send({ticks_history:current,end:'latest',count:1000,style:'candles',granularity:timeframe,req_id:++reqSeq});
+  send({ticks:current,subscribe:1,req_id:++reqSeq});
+  updateMarketUI();
+}
+function candle(t,p){const time=Math.floor(t/timeframe)*timeframe;bars[time]={time,open:p,high:p,low:p,close:p}}
+function tickCandle(t,p){
+  const time=Math.floor(t/timeframe)*timeframe;
+  let b=bars[time];
+  if(!b)b={time,open:p,high:p,low:p,close:p};
+  b.high=Math.max(b.high,p);b.low=Math.min(b.low,p);b.close=p;bars[time]=b;
+  try{series?.update(b)}catch(e){console.warn('Chart update failed',e)}
+}
+function handlePublic(d){
+  if(d.error){console.warn(d.error.message);chartStatus(d.error.message,'bad');return}
+  if(d.msg_type==='active_symbols'){setMarkets(d.active_symbols||[]);return}
+  if(d.msg_type==='history'&&d.history){
+    try{
+      if(Array.isArray(d.history.candles)&&d.history.candles.length){
+        bars={};
+        const data=d.history.candles.map(c=>({
+          time:+c.epoch,open:+c.open,high:+c.high,low:+c.low,close:+c.close
+        })).filter(c=>Number.isFinite(c.time)&&[c.open,c.high,c.low,c.close].every(Number.isFinite));
+        data.forEach(c=>bars[c.time]=c);
+        series?.setData(data);
+        chart?.timeScale().fitContent(); window._fallbackDraw?.();
+      }else if(Array.isArray(d.history.times)&&Array.isArray(d.history.prices)){
+        bars={};
+        d.history.times.forEach((t,i)=>candle(+t,+d.history.prices[i]));
+        const data=Object.values(bars).sort((a,b)=>a.time-b.time);
+        series?.setData(data);
+        chart?.timeScale().fitContent(); window._fallbackDraw?.();
+      }
+      chartStatus('','ok');
+    }catch(e){console.error(e);chartStatus('Could not render market history.','bad')}
+    return
+  }
+  if(d.msg_type==='tick'&&d.tick){
+    price=+d.tick.quote;
+    $('dashPrice').textContent=Number(price).toFixed(5);
+    $('dashPriceTime').textContent=new Date().toLocaleTimeString();
+    $('tickInfo').textContent='Live tick '+new Date().toLocaleTimeString();
+    tickCandle(+d.tick.epoch,price);
+    chartStatus('','ok');
+    renderWatch();
+  }
+}
+$('marketTop').onchange=e=>chooseMarket(e.target.value);$('ticketMarket').onchange=e=>chooseMarket(e.target.value);document.querySelectorAll('.tf').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tf').forEach(x=>x.classList.remove('active'));b.classList.add('active');timeframe=+b.dataset.tf;subscribeMarket()});
+function baseProposal(type,fromTicket=false){let q={proposal:1,basis:'stake',currency:(account?.currency||'USD'),amount:10,contract_type:'CALL',underlying_symbol:current,duration:5,duration_unit:'t'};if(fromTicket){q.underlying_symbol=$('ticketMarket').value;q.contract_type=$('ticketType').value;q.amount=+$('ticketStake').value;q.duration=+$('ticketDur').value;q.duration_unit=$('ticketUnit').value;return q}if(type==='manual'){q.underlying_symbol=($('manualMarket')?.value||document.querySelector('#manual .market').value);q.contract_type=$('manualType').value;q.amount=+$('manualStake').value;q.duration=+$('manualDur').value;q.duration_unit=$('manualUnit').value;if(/^DIGIT/.test(q.contract_type))q.barrier=$('manualBarrier').value}if(type==='rise'){q.underlying_symbol=document.querySelector('#rise .market').value;q.contract_type=$('riseType').value;q.amount=+$('riseStake').value;q.duration=+$('riseDur').value;q.duration_unit=$('riseUnit').value}if(type==='ou'){q.underlying_symbol=$('ouMarket').value;q.contract_type=$('ouType').value;q.amount=+$('ouStake').value;q.duration=+$('ouDur').value;q.duration_unit=$('ouUnit').value;q.barrier=$('ouBarrier').value}if(type==='digits'){q.underlying_symbol=document.querySelector('#digits .market').value;q.contract_type=$('digitType').value;q.amount=+$('digitStake').value;q.duration=+$('digitDur').value;q.duration_unit='t';q.barrier=$('digitBarrier').value}if(type==='evenodd'){q.underlying_symbol=$('eoMarket').value;q.contract_type=$('eoType').value;q.amount=+$('eoStake').value;q.duration=+$('eoDur').value;q.duration_unit='t'}if(type==='matches'){q.underlying_symbol=document.querySelector('#matches .market').value;q.contract_type=$('matchType').value;q.amount=+$('matchStake').value;q.duration=5;q.duration_unit='t';q.barrier=$('matchBarrier').value}if(type==='higher'){q.underlying_symbol=document.querySelector('#higher .market').value;q.contract_type=$('higherType').value;q.amount=+$('higherStake').value;q.duration=+$('higherDur').value;q.duration_unit='t';q.barrier=$('higherBarrier').value}if(type==='touch'){q.underlying_symbol=document.querySelector('#touch .market').value;q.contract_type=$('touchType').value;q.amount=+$('touchStake').value;q.duration=+$('touchDur').value;q.duration_unit='t';q.barrier=$('touchBarrier').value}return q}
+function wsRequest(o,sock){sock=sock||((tradeWS?.readyState===1)?tradeWS:publicWS);return new Promise((resolve,reject)=>{if(!sock||sock.readyState!==1)return reject(Error('Connection is offline.'));const id=++reqSeq;const timer=setTimeout(()=>{sock.removeEventListener('message',fn);reject(Error('Request timed out.'))},12000);const fn=e=>{let d;try{d=JSON.parse(e.data)}catch{return}if(d.req_id===id){clearTimeout(timer);sock.removeEventListener('message',fn);if(d.error)reject(Error(d.error.message));else resolve(d)}};sock.addEventListener('message',fn);sock.send(JSON.stringify({...o,req_id:id}))})}
+async function getProposal(type){const ids={manual:'manualStatus',ou:'ouStatus',digits:'digitsStatus',evenodd:'evenoddStatus',rise:'riseStatus',higher:'higherStatus',touch:'touchStatus',matches:'matchesStatus'};const st=$(ids[type]);if(st){st.textContent='Requesting live proposal…';st.className='status'}try{const q=baseProposal(type);if(!q.underlying_symbol)throw Error('Select a market.');if(!(q.amount>0))throw Error('Stake must be greater than zero.');const d=await wsRequest(q,(authenticated&&tradeWS?.readyState===1)?tradeWS:publicWS);lastProposal=d.proposal;renderProposal(d.proposal);if(st){st.textContent='Live proposal received. Review the payout before buying.';st.className='status ok'}toast('Live proposal received','ok')}catch(e){if(st){st.textContent=e.message;st.className='status bad'}toast(e.message,'bad')}}
+function renderProposal(p){const payout=Number(p?.payout??p?.ask_price),ask=Number(p?.ask_price??0),profit=payout-ask;const vals=[['manualPayout',payout],['ouPayout',payout],['ticketPayout',payout],['eoPayout',payout]];vals.forEach(([id,v])=>{if($(id))$(id).textContent=Number.isFinite(v)?'$ '+v.toFixed(2):'—'});[['manualProfit',profit],['ouProfit',profit],['ticketProfit',profit],['eoProfit',profit]].forEach(([id,v])=>{if($(id))$(id).textContent=Number.isFinite(v)?'$ '+v.toFixed(2):'—'})}
+async function buyProposal(){if(!lastProposal){toast('Get a live proposal first.','bad');return}if(!authenticated||tradeWS?.readyState!==1){toast('Connect the selected Demo or Real account first.','bad');go('settings');return}try{const d=await wsRequest({buy:lastProposal.id,price:Number(lastProposal.ask_price)},tradeWS);if(!d.buy)throw Error('Deriv did not confirm the purchase.');toast('Contract purchased successfully.','ok');lastProposal=null;refreshAccount();loadHistory()}catch(e){toast(e.message,'bad')}}
+async function ticketQuote(dir){$('ticketType').value=dir;$('ticketStatus').textContent='Requesting live quote…';$('ticketStatus').className='status';try{const d=await wsRequest(baseProposal('ticket',true),publicWS);lastProposal=d.proposal;renderProposal(d.proposal);$('ticketStatus').textContent='Quote received. Review payout, then use the buy action on a trading page.';$('ticketStatus').className='status ok'}catch(e){$('ticketStatus').textContent=e.message;$('ticketStatus').className='status bad'}}
+function refreshAccount(){if(!tradeWS||tradeWS.readyState!==1){toast('No authenticated account session.','bad');return}tradeWS.send(JSON.stringify({balance:1,subscribe:1,req_id:++reqSeq}));tradeWS.send(JSON.stringify({portfolio:1,req_id:++reqSeq}));loadHistory()}
+function renderOpenTrades(list){$('openCount').textContent=list.length;const body=$('openBody');if(!list.length){body.innerHTML='<tr><td colspan="6" class="empty">No open positions.</td></tr>';return}body.innerHTML=list.map(c=>{const pl=Number(c.profit_loss||0);return`<tr><td>${esc(c.contract_type||'Contract')}</td><td>${esc(c.underlying||'—')}</td><td>${esc(c.entry_spot??'—')}</td><td>$${Number(c.buy_price||0).toFixed(2)}</td><td class="${pl>=0?'positive':'negative'}">$${pl.toFixed(2)}</td><td><button class="btn red" style="height:30px;padding:0 8px" onclick="sellContract('${esc(c.contract_id||c.id||'')}')">SELL</button></td></tr>`}).join('')}
+async function sellContract(id){if(!id||!authenticated||tradeWS?.readyState!==1)return;try{const d=await wsRequest({sell:id,price:0},tradeWS);if(d.error)throw Error(d.error.message);toast('Contract sell request sent.','ok');refreshAccount();loadHistory()}catch(e){toast(e.message,'bad')}}
+async function loadHistory(){if(!authenticated||tradeWS?.readyState!==1)return;try{const d=await wsRequest({profit_table:1,limit:50,sort:'DESC'},tradeWS);const rows=d.profit_table?.transactions||d.profit_table?.contracts||[];const body=$('historyBody');if(!rows.length){body.innerHTML='<tr><td colspan="7" class="empty">No closed trade history returned.</td></tr>';return}body.innerHTML=rows.map(r=>{const pl=Number(r.profit_loss||r.profit||0);return`<tr><td>${r.date?new Date(r.date*1000).toLocaleString():'—'}</td><td>${esc(r.underlying||r.symbol||'—')}</td><td>${esc(r.contract_type||r.contract||'—')}</td><td>$${Number(r.buy_price||0).toFixed(2)}</td><td>$${Number(r.sell_price||0).toFixed(2)}</td><td class="${pl>=0?'positive':'negative'}">$${pl.toFixed(2)}</td><td>${esc(r.status||'Closed')}</td></tr>`}).join('')}catch(e){console.warn(e)}}
+function switchAccountMode(mode){accountType=mode;$('accountMode').className='acct-select '+mode;if(authenticated&&account?.account_type!==mode){disconnectAccount();setStatus('Account mode changed. Connect the selected account.','warn')}}
+function configured(){return !!CONFIG.OAUTH_CLIENT_ID && !!CONFIG.OAUTH_GATEWAY && CONFIG.REDIRECT_URI==='https://goonfx.com'}
+function redirectUri(){return CONFIG.REDIRECT_URI}
+function b64url(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+async function sha256(s){return b64url(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))))}
+function verifier(){const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~',a=new Uint8Array(64);crypto.getRandomValues(a);return Array.from(a,v=>chars[v%chars.length]).join('')}
+async function startOAuth(mode){
+  // Deriv authorization is independent of optional Google identity.
+  // This keeps trading usable even if Google Sign-In is unavailable or blocked.
+  if(typeof gxConnectDeriv === 'function'){
+    gxConnectDeriv(mode);
+    return;
+  }
+  setStatus('Deriv connection interface is still loading. Please try again.','warn');
+}
+async function handleOAuth(){const q=new URLSearchParams(location.search);const code=q.get('code'),state=q.get('state'),error=q.get('error');if(error){const msg=q.get('error_description')||error;setStatus('Deriv authorization failed: '+msg,'bad');toast('Deriv authorization failed','bad');history.replaceState({},'',redirectUri());return}if(!code)return;const saved=sessionStorage.getItem('gx_state'),v=sessionStorage.getItem('gx_v'),mode=sessionStorage.getItem('gx_mode')||'demo';if(!saved||state!==saved||!v){setStatus('OAuth session validation failed. Start again.','bad');return}try{setStatus('Completing secure Deriv login…');const payload={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,code_verifier:v,redirect_uri:redirectUri(),client_id:CONFIG.OAUTH_CLIENT_ID})};
+    let r=await fetch(CONFIG.OAUTH_GATEWAY+'/oauth/exchange',payload);
+    if(r.status===404)r=await fetch(CONFIG.OAUTH_GATEWAY+'/oauth/exchange',payload);const d=await r.json();if(!r.ok||!d.access_token)throw Error(d.error||'OAuth exchange failed.');sessionStorage.setItem('gx_token',d.access_token);if(d.expires_in)sessionStorage.setItem('gx_exp',String(Date.now()+d.expires_in*1000));sessionStorage.removeItem('gx_state');sessionStorage.removeItem('gx_v');sessionStorage.removeItem('gx_mode');history.replaceState({},'',redirectUri());await connectAuthorized(mode);gxEnterTerminal()}catch(e){setStatus(e.message,'bad')}}
+function token(){return sessionStorage.getItem('gx_token')||''}
+async function api(path,opts={}){const t=token();if(!t)throw Error('No OAuth token.');const headers=Object.assign({'Authorization':'Bearer '+t,'Deriv-App-ID':CONFIG.OAUTH_CLIENT_ID,'Content-Type':'application/json'},opts.headers||{});const r=await fetch(CONFIG.API_BASE+path,{...opts,headers});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d?.errors?.[0]?.message||d?.message||`API error ${r.status}`);return d}
+async function connectAuthorized(mode){try{accountType=mode;const data=await api('/trading/v1/options/accounts');const list=Array.isArray(data.data)?data.data:(Array.isArray(data.data?.accounts)?data.data.accounts:(data.data?[data.data]:[]));const wanted=list.filter(a=>(a.account_type||'').toLowerCase()===mode);if(!wanted.length)throw Error(`No ${mode} options account is available for this Deriv login.`);account=wanted[0];const otp=await api(`/trading/v1/options/accounts/${encodeURIComponent(account.account_id)}/otp`,{method:'POST'});const url=otp?.data?.url;if(!url)throw Error('Deriv did not return an authenticated trading WebSocket URL.');openTradeSocket(url,account)}catch(e){setStatus(e.message,'bad');toast(e.message,'bad')}}
+function openTradeSocket(url,a){if(tradeWS){try{tradeWS.close()}catch{}};authenticated=false;tradeWS=new WebSocket(url);tradeWS.onopen=()=>{authenticated=true;account=a;$('accountLabel').textContent='Authorized';$('accountSession').textContent=(a.account_type||accountType).toUpperCase();$('accountBalance').textContent=a.balance!=null?'$ '+Number(a.balance).toFixed(2):'—';$('oauthAccount').textContent=(a.account_type||accountType).toUpperCase()+' ACCOUNT';if($('oauthAuthState'))$('oauthAuthState').textContent='AUTHORIZED';$('oauthBal').textContent=a.balance!=null?'$ '+Number(a.balance).toFixed(2):'—';$('dashAccountState').textContent='CONNECTED';$('dashAccountLogin').textContent=a.account_id;$('accountStatus').textContent='Authenticated trading session connected.';$('accountStatus').className='status ok';setStatus('Account connected: '+a.account_id,'ok');refreshAccount()};tradeWS.onmessage=e=>handleTrade(JSON.parse(e.data));tradeWS.onerror=()=>{authenticated=false;setStatus('Trading session error. Reconnect the account.','bad')};tradeWS.onclose=()=>{authenticated=false;$('dashAccountState').textContent='PUBLIC DATA';$('dashAccountLogin').textContent='Not authenticated'}}
+function handleTrade(d){if(d.error){toast(d.error.message,'bad');return}if(d.msg_type==='balance'&&d.balance){const b=Number(d.balance.balance);$('topBalance').textContent=Number.isFinite(b)?b.toFixed(2):'—';$('dashBalance').textContent=Number.isFinite(b)?'$ '+b.toFixed(2):'—';$('accountBalance').textContent=Number.isFinite(b)?((account?.currency||'USD')+' '+b.toFixed(2)):'—';$('oauthBal').textContent=Number.isFinite(b)?((account?.currency||'USD')+' '+b.toFixed(2)):'—'}if(d.msg_type==='portfolio'&&d.portfolio)renderOpenTrades(d.portfolio.contracts||[]);if(d.msg_type==='proposal_open_contract'&&d.proposal_open_contract)refreshAccount()}
+function disconnectAccount(){gxEnterTerminal();sessionStorage.removeItem('gx_token');sessionStorage.removeItem('gx_exp');if(tradeWS){try{tradeWS.close()}catch{}}tradeWS=null;authenticated=false;account=null;$('topBalance').textContent='—';$('dashBalance').textContent='—';$('dashAccountState').textContent='PUBLIC DATA';$('dashAccountLogin').textContent='Not authenticated';$('accountLabel').textContent='Not connected';$('accountBalance').textContent='—';$('accountSession').textContent='Public';$('oauthAccount').textContent='Not connected';if($('oauthAuthState'))$('oauthAuthState').textContent='Not authorized';$('oauthBal').textContent='—';$('openBody').innerHTML='<tr><td colspan="6" class="empty">Connect an account to see open trades.</td></tr>';setStatus('Disconnected. Public market data remains available.','warn');toast('Account disconnected')}
+function openModal(title,text){$('modalTitle').textContent=title;$('modalText').textContent=text;$('modal').classList.remove('hidden')}function closeModal(){$('modal').classList.add('hidden')}
+$('eoType')?.addEventListener('change',()=>{if($('eoSelected'))$('eoSelected').textContent=$('eoType').value==='DIGITEVEN'?'EVEN':'ODD'});
+// Initial state
+$('accountMode').value='demo';switchAccountMode('demo');initChart();connectPublic();handleOAuth();if(!configured())setStatus('Public market data is live. Configure OAuth before connecting Demo/Real trading.','warn');setTimeout(()=>{if(current)subscribeMarket();},500);
+</script>
+<script>
+/* ===== ENHANCED MANUAL + BOT + GOOGLE UI ===== */
+const BOT={running:false,trades:0,pnl:0,unsub:null,lastTick:null};
+function setManualContract(type){const el=$('manualType');if(el)el.value=type;document.querySelectorAll('#manualTabs button').forEach(b=>b.classList.toggle('active',b.dataset.manual===type));syncManualUI()}
+function syncManualUI(){const t=$('manualType')?.value||'CALL';const digit=/^DIGIT/.test(t);if($('manualBarrierTool'))$('manualBarrierTool').style.display=digit?'block':'none';if($('manualTicketMarket'))$('manualTicketMarket').textContent=$('manualMarket')?.selectedOptions?.[0]?.textContent||current||'—';}
+function clearManualProposal(){
+  lastProposal=null;
+  ['manualPayout','ouPayout','ticketPayout','eoPayout','manualProfit','ouProfit','ticketProfit','eoProfit'].forEach(id=>{if($(id))$(id).textContent='—'});
+  if($('manualStatus')){$('manualStatus').textContent='Quote cleared. Get a new live proposal.';$('manualStatus').className='status'}
+}
+function adjustManualStake(d){const e=$('manualStake'),v=Math.max(.35,(Number(e?.value||10)+d));if(e)e.value=v.toFixed(2);if($('ticketStakeValue'))$('ticketStakeValue').textContent=v.toFixed(2)}
+function selectManualDigit(d){$('manualBarrier').value=d;document.querySelectorAll('#manualDigits button,#ticketDigits button').forEach(b=>b.classList.toggle('active',b.dataset.digit==d));$('manualStatus').textContent='Digit/barrier '+d+' selected.';}
+function buildDigitButtons(){['manualDigits','ticketDigits'].forEach(id=>{const e=$(id);if(!e)return;e.innerHTML=Array.from({length:10},(_,d)=>`<button data-digit="${d}" onclick="selectManualDigit(${d})">${d}</button>`).join('')})}
+function logBot(msg){const e=$('botLog');if(e){e.textContent+=`[${new Date().toLocaleTimeString()}] ${msg}\n`;e.scrollTop=e.scrollHeight}}
+function clearBotLog(){if($('botLog'))$('botLog').textContent='[GOON FX PRO] Bot log cleared.\n'}
+function setBotState(on){$('botStateText').textContent=on?'RUNNING':'STOPPED';$('botDot').classList.toggle('on',on);$('botStatus').textContent=on?'Bot is listening for live ticks.':'Bot stopped.';$('botStatus').className='status '+(on?'ok':'warn')}
+async function startBot(){
+  if(BOT.running)return;
+  if(!authenticated||tradeWS?.readyState!==1){go('settings');toast('Connect a Deriv Demo or Real account before starting the live bot.','bad');return}
+  BOT.running=true;BOT.trades=0;BOT.pnl=0;setBotState(true);logBot('Bot started on '+($('botMarket')?.value||current));
+  if(publicWS?.readyState===1){try{publicWS.send(JSON.stringify({ticks:1,subscribe:1,symbol:$('botMarket')?.value||current,req_id:++reqSeq}));}catch{}}
+}
+function stopBot(){BOT.running=false;setBotState(false);logBot('Bot stopped.');}
+async function botOnTick(tick){
+  if(!BOT.running)return;const price=Number(tick.quote),prev=BOT.lastTick;BOT.lastTick=price;if(!prev)return;
+  const strategy=$('botStrategy').value,stake=Number($('botStake').value||1),dur=Number($('botDur').value||5),bar=String($('botBarrier').value||5),max=Number($('botMaxTrades').value||5);
+  if(BOT.trades>=max){stopBot();logBot('Maximum trades reached.');return}
+  let type=null;
+  if(strategy==='momentum')type=price>=prev?'CALL':'PUT';
+  else if(strategy==='digit-over'){const d=String(price).slice(-1);if(Number(d)>Number(bar))type='DIGITOVER'}
+  else if(strategy==='digit-under'){const d=String(price).slice(-1);if(Number(d)<Number(bar))type='DIGITUNDER'}
+  else if(strategy==='even-odd'){const d=Number(String(price).slice(-1));type=d%2===0?'DIGITEVEN':'DIGITODD'}
+  if(!type)return;
+  const old=$('manualMarket')?.value; if($('manualMarket'))$('manualMarket').value=$('botMarket').value; $('manualType').value=type; $('manualStake').value=stake; $('manualDur').value=dur;$('manualUnit').value='t';$('manualBarrier').value=bar;
+  try{await getProposal('manual');if(lastProposal){await buyProposal();BOT.trades++;logBot(`Trade ${BOT.trades}: ${type} ${stake} on ${$('botMarket').value}`);const sl=Number($('botStopLoss').value||0),tp=Number($('botTakeProfit').value||0);if(sl&&BOT.pnl<=-sl){stopBot();logBot('Stop loss reached.')}if(tp&&BOT.pnl>=tp){stopBot();logBot('Take profit reached.')}}}catch(e){logBot('Trade error: '+e.message)}
+  if($('manualMarket')&&old)$('manualMarket').value=old;
+}
+function startGoogleLogin(){
+  // Google Web OAuth cannot be launched from a file:// page. Google requires
+  // a secure HTTPS origin for production; localhost is allowed for development.
+  if(location.protocol==='file:'){
+    const msg='Google blocked this local HTML because it is being opened as file://. Open GOON FX at https://goonfx.com, or run this file from http://localhost and add that localhost origin to the Google Web Client ID.';
+    if($('googleDirectStatus')){$('googleDirectStatus').textContent=msg;$('googleDirectStatus').className='status bad'}
+    setStatus(msg,'bad');
+    toast('Open GOON FX from HTTPS, not a local file.','bad');
+    return;
+  }
+  if(location.protocol!=='https:' && location.hostname!=='localhost' && location.hostname!=='127.0.0.1'){
+    const msg='Google Sign-In requires a secure HTTPS origin. Open https://goonfx.com.';
+    if($('googleDirectStatus')){$('googleDirectStatus').textContent=msg;$('googleDirectStatus').className='status bad'}
+    setStatus(msg,'bad');
+    return;
+  }
+  if(!window.google?.accounts?.id){
+    toast('Google Sign-In is still loading. Refresh the page and try again.','bad');
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id:GOOGLE_CLIENT_ID,
+    callback:handleGoogleCredential,
+    auto_select:false,
+    cancel_on_tap_outside:false,
+    ux_mode:'popup',
+    use_fedcm_for_prompt:true
+  });
+  const target=$('googleBtn');
+  if(target){
+    target.innerHTML='';
+    google.accounts.id.renderButton(target,{
+      theme:'filled_black',
+      size:'large',
+      shape:'rectangular',
+      text:'continue_with',
+      width:320,
+      logo_alignment:'left'
+    });
+    target.style.display='block';
+  }
+}
+
+function handleGoogleCredential(resp){
+  try{
+    if(!resp?.credential) throw Error('Google did not return a credential.');
+    const part=resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const padded=part+'='.repeat((4-part.length%4)%4);
+    const p=JSON.parse(atob(padded));
+    sessionStorage.setItem('gx_google_id_token',resp.credential);
+    sessionStorage.setItem('gx_google_sub',p.sub||'');
+    sessionStorage.setItem('gx_google_name',p.name||'');
+    sessionStorage.setItem('gx_google_email',p.email||'');
+    sessionStorage.setItem('gx_google_picture',p.picture||'');
+    if($('googleName'))$('googleName').textContent=p.name||'Google user';
+    if($('googleEmail'))$('googleEmail').textContent=p.email||'';
+    if($('googleAvatar')&&p.picture)$('googleAvatar').src=p.picture;
+    if($('googleUser'))$('googleUser').style.display='flex';
+    if($('googleBtn'))$('googleBtn').style.display='none';
+    if($('googleDirectStatus')){$('googleDirectStatus').textContent='Google account selected. Now connect Deriv to authorize trading.';$('googleDirectStatus').className='status ok'}
+    setStatus('Google account selected. Now connect Deriv to authorize trading.','ok');
+    toast('Google connected','ok');
+    if(sessionStorage.getItem('gx_google_then_deriv')==='1'){
+      const mode=sessionStorage.getItem('gx_google_then_deriv_mode')||'demo';
+      sessionStorage.removeItem('gx_google_then_deriv');
+      sessionStorage.removeItem('gx_google_then_deriv_mode');
+      setTimeout(()=>{ if(typeof gxConnectDeriv==='function') gxConnectDeriv(mode); },250);
+    }
+  }catch(e){setStatus('Google sign-in failed. '+e.message,'bad');toast('Google sign-in failed','bad')}
+}
+function buildDigitButtons(){
+  const roots=document.querySelectorAll('.gx-digit-circles');
+  roots.forEach(root=>{
+    root.innerHTML='';
+    for(let n=1;n<=9;n++){
+      const b=document.createElement('button');
+      b.type='button'; b.className='gx-digit-circle'; b.dataset.digit=String(n); b.innerHTML='<strong>'+n+'</strong><span class="gx-pct">10%</span>';
+      b.addEventListener('click',()=>{
+        roots.forEach(r=>r.querySelectorAll('.gx-digit-circle').forEach(x=>x.classList.remove('active')));
+        b.classList.add('active');
+        const target=root.dataset.target;
+        if(target){const el=$(target);if(el){el.value=n;el.dispatchEvent(new Event('change',{bubbles:true}));}}
+        if(root.id==='manualDigitCircles'){const x=$('manualBarrier');if(x){x.value=n;x.dispatchEvent(new Event('change',{bubbles:true}));}}
+        if(root.id==='bulkDigitCircles'){const x=$('bulkBarrier');if(x){x.value=n;x.dispatchEvent(new Event('change',{bubbles:true}));}}
+        if(typeof GOON_LIVE!=='undefined'&&GOON_LIVE.sync)GOON_LIVE.sync();
+      });
+      root.appendChild(b);
+    }
+  });
+}
+function initEnhancedUI(){
+
+const gn=sessionStorage.getItem('gx_google_name');
+if(gn){if($('googleName'))$('googleName').textContent=gn;if($('googleEmail'))$('googleEmail').textContent=sessionStorage.getItem('gx_google_email')||'';if($('googleAvatar')&&sessionStorage.getItem('gx_google_picture'))$('googleAvatar').src=sessionStorage.getItem('gx_google_picture');if($('googleUser'))$('googleUser').style.display='flex';if($('googleBtn'))$('googleBtn').style.display='none';}
+buildDigitButtons();syncManualUI();const r=$('manualTickRange');if(r)r.oninput=()=>{$('manualDur').value=r.value;$('manualTickValue').textContent=r.value};document.querySelectorAll('#manualTabs button').forEach(b=>b.onclick=()=>setManualContract(b.dataset.manual));if($('manualStake'))$('manualStake').oninput=e=>{$('ticketStakeValue').textContent=Number(e.target.value||0).toFixed(2)};if($('manualMarket'))$('manualMarket').onchange=()=>{syncManualUI();if(window.gxResetTickTape)window.gxResetTickTape($('manualMarket').value)};}
+const _oldHandleTrade=window.handleTrade; if(typeof _oldHandleTrade==='function')window.handleTrade=function(d){if(d.tick)botOnTick(d.tick);return _oldHandleTrade(d)};
+initEnhancedUI();
+</script>
+<script>
+(function(){
+  const GX={digits:[],scores:Array(10).fill(0)};
+  window.GX=GX;
+  function q(id){return document.getElementById(id)}
+  function lastDigit(v){
+    const s=String(v);
+    const m=s.replace(/[^0-9]/g,'');
+    return m?Number(m[m.length-1]):null;
+  }
+  function render(){
+    const total=GX.scores.reduce((a,b)=>a+b,0)||1;
+    const ranked=GX.scores.map((s,n)=>({n,s,p:s/total*100})).sort((a,b)=>b.s-a.s);
+    const el=q('digitHeat'); if(!el)return;
+    el.innerHTML=ranked.map((x,i)=>`<button class="heat-circle ${i===0?'hot':''}" onclick="GX.select(${x.n})"><strong>${x.n}</strong><span>${x.p.toFixed(1)}%</span></button>`).join('');
+    if(q('topDigit'))q('topDigit').textContent=ranked[0]?.n??'—';
+    if(q('secondDigit'))q('secondDigit').textContent=ranked[1]?.n??'—';
+    if(q('digitSample'))q('digitSample').textContent=GX.digits.length+' ticks';
+    if(q('digitSignal')){
+      q('digitSignal').textContent=GX.digits.length>=20?`Current leaders: ${ranked[0].n} and ${ranked[1].n}`:`Collecting live ticks: ${GX.digits.length}/20`;
+      q('digitSignal').className='status '+(GX.digits.length>=20?'ok':'warn');
+    }
+  }
+  GX.feed=function(price){
+    const d=lastDigit(price); if(d===null)return;
+    GX.digits.push(d); if(GX.digits.length>100)GX.digits.shift();
+    GX.scores=Array(10).fill(0);
+    GX.digits.forEach((x,i)=>GX.scores[x]+=1+(i/GX.digits.length)*2);
+    render();
+    if(q('proPrice'))q('proPrice').textContent=price;
+  };
+  GX.select=function(d){
+    if(q('manualBarrier'))q('manualBarrier').value=d;
+    if(q('ouBarrier'))q('ouBarrier').value=d;
+    if(typeof toast==='function')toast('Digit '+d+' selected','ok');
+  };
+  render();
+
+  // Hook the existing public tick handler without replacing it.
+  const old=window.handlePublic;
+  if(typeof old==='function'){
+    window.handlePublic=function(d){
+      try{if(d&&d.tick)GX.feed(d.tick.quote)}catch(e){}
+      return old.apply(this,arguments);
+    };
+  }
+})();
+</script>
+
+<script>
+function gxOpenConnect(){document.getElementById('gxConnectionModal').classList.add('open')}
+function gxCloseConnect(){document.getElementById('gxConnectionModal').classList.remove('open')}
+function gxEnterTerminal(){
+  const p=document.getElementById('gxMaxHome')||document.getElementById('gxPublicLanding');
+  if(p)p.style.display='none';
+  const app=document.getElementById('gxTradingApp')||document.querySelector('.app');
+  if(app)app.style.display='grid';
+  if(typeof go==='function')go('dashboard');
+}
+function gxConnectDeriv(mode){
+  const status=document.getElementById('gxConnectStatus');
+  if(status){
+    status.className='gx-connect-status';
+    status.textContent='Opening secure Deriv authorization…';
+  }
+  if(typeof configured==='function' && !configured()){
+    if(status){
+      status.className='gx-connect-status bad';
+      status.textContent='Deriv OAuth configuration is incomplete.';
+    }
+    return;
+  }
+
+  const w=window.open(
+    'about:blank',
+    'goonfx_deriv_auth',
+    'width=520,height=760,menubar=no,toolbar=no,location=yes,resizable=yes,scrollbars=yes'
+  );
+  if(!w){
+    const s=document.getElementById('gxMaxLoginStatus');
+    if(s){s.style.display='block';s.textContent='Popup blocked — allow popups for goonfx.com, then click Log in again.';}
+    if(status){
+      status.className='gx-connect-status bad';
+      status.textContent='Popup blocked. Allow popups for goonfx.com and click Connect again.';
+    }
+    return;
+  }
+
+  sessionStorage.setItem('gx_popup_mode',mode);
+  gxBuildOAuthPopup(w,mode).catch(function(e){
+    try{w.close()}catch(_){}
+    if(status){
+      status.className='gx-connect-status bad';
+      status.textContent=e.message||'Could not start Deriv authorization.';
+    }
+  });
+}
+async function gxBuildOAuthPopup(w,mode){
+  const v=verifier();
+  const state=b64url(crypto.getRandomValues(new Uint8Array(24)));
+  const challenge=await sha256(v);
+
+  // These live in the opener and are available when the popup posts its callback.
+  sessionStorage.setItem('gx_v',v);
+  sessionStorage.setItem('gx_state',state);
+  sessionStorage.setItem('gx_mode',mode);
+
+  const p=new URLSearchParams();
+  p.set('response_type','code');
+  p.set('client_id',CONFIG.OAUTH_CLIENT_ID);
+  p.set('redirect_uri','https://goonfx.com');
+  p.set('scope','trade');
+  p.set('state',state);
+  p.set('code_challenge',challenge);
+  p.set('code_challenge_method','S256');
+
+  w.location.replace('https://auth.deriv.com/oauth2/auth?'+p.toString());
+  gxCloseConnect();
+}
+async function gxCompletePopupOAuth(code,state,mode){
+  if(!code){setStatus('No Deriv authorization code returned.','bad');return}
+  const saved=sessionStorage.getItem('gx_state'),v=sessionStorage.getItem('gx_v');
+  if(!saved||state!==saved||!v){setStatus('OAuth session validation failed. Start again.','bad');return}
+  try{
+    setStatus('Completing secure Deriv login…');
+    const payload={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,code_verifier:v,redirect_uri:redirectUri(),client_id:CONFIG.OAUTH_CLIENT_ID})};
+    let r=await fetch(CONFIG.OAUTH_GATEWAY+'/oauth/exchange',payload);
+    if(r.status===404)r=await fetch(CONFIG.OAUTH_GATEWAY+'/oauth/exchange',payload);
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.access_token)throw Error(d.error||'OAuth exchange failed.');
+    sessionStorage.setItem('gx_token',d.access_token);
+    if(d.expires_in)sessionStorage.setItem('gx_exp',String(Date.now()+d.expires_in*1000));
+    sessionStorage.removeItem('gx_state');sessionStorage.removeItem('gx_v');
+    await connectAuthorized(mode);
+    gxEnterTerminal();
+    setStatus('Deriv '+mode+' account connected.','ok');
+  }catch(e){setStatus(e.message,'bad')}
+}
+</script>
+
+
+<script id="gx-tick-tape">
+(function(){
+  const state={ticks:[],symbol:'',counts:Array(10).fill(0)};
+  function $(id){return document.getElementById(id)}
+  function digitFromQuote(q){
+    const s=String(q);
+    const clean=s.replace(/[^0-9]/g,'');
+    const d=Number(clean.slice(-1));
+    return Number.isFinite(d)&&d>=0&&d<=9?d:null;
+  }
+  function render(){
+    const strip=$('gxTickStrip'); if(!strip)return;
+    const last=state.ticks[state.ticks.length-1];
+    $('gxTickMarket').textContent=state.symbol||'—';
+    $('gxTickCount').textContent=String(state.ticks.length);
+    $('gxLastDigit').textContent=last?last.d:'—';
+    const ranked=state.counts.map((n,d)=>({d,n})).sort((a,b)=>b.n-a.n||a.d-b.d);
+    $('gxHotDigits').textContent=ranked.slice(0,3).map(x=>x.d).join(' · ')||'—';
+    if(last){
+      // Heuristic only: recent weighted frequency + short streak adjustment.
+      const recent=state.ticks.slice(-40);
+      const score=Array(10).fill(0);
+      recent.forEach((x,i)=>{score[x.d]+=1+(i/recent.length)*2});
+      const top=score.map((n,d)=>({d,n})).sort((a,b)=>b.n-a.n||a.d-b.d)[0];
+      $('gxNextDigit').textContent=top?top.d:'—';
+      $('gxPredictionNote').textContent='heuristic';
+    }
+    strip.innerHTML=state.ticks.slice(-24).map((x,i,a)=>{
+      const latest=i===a.length-1;
+      return `<span class="gx-tick ${latest?'latest':''}">${x.d}<small>${x.q}</small></span>`;
+    }).join('')||'<span class="gx-tape-empty">Waiting for live ticks…</span>';
+    strip.scrollLeft=strip.scrollWidth;
+  }
+  window.gxFeedTickTape=function(symbol,quote,epoch){
+    const d=digitFromQuote(quote);
+    if(d===null)return;
+    if(state.symbol && state.symbol!==symbol){state.ticks=[];state.counts=Array(10).fill(0)}
+    state.symbol=symbol;
+    state.ticks.push({d,q:Number(quote).toFixed(5),t:epoch||Date.now()/1000});
+    if(state.ticks.length>80)state.ticks.shift();
+    state.counts[d]++;
+    render();
+  };
+  window.gxResetTickTape=function(symbol){state.symbol=symbol||'';state.ticks=[];state.counts=Array(10).fill(0);render()};
+})();
+</script>
+<script id="gx-live-deriv-feed">
+(function(){
+  /* GOON FX live Deriv market layer.
+     Uses Deriv's public WebSocket market-data feed for active symbols,
+     historical ticks and continuous tick subscriptions. */
+  const LIVE_WS='wss://api.derivws.com/trading/v1/options/ws/public';
+  let liveSocket=null, liveReconnect=null, liveSeq=50000;
+  const liveSubs=new Map();
+  const last={price:null,prev:null,epoch:null,symbol:null};
+  const graphState={};
+  const digitCounts={};
+
+  function $g(id){return document.getElementById(id)}
+  function sendLive(obj){if(liveSocket&&liveSocket.readyState===WebSocket.OPEN)liveSocket.send(JSON.stringify(obj))}
+  function setLiveText(id,text){const e=$g(id);if(e)e.textContent=text}
+  function symbolOfTick(t){return t?.symbol||t?.underlying_symbol||t?.echo_req?.ticks||''}
+  function symbolOfHistory(d){return d?.echo_req?.ticks_history||d?.echo_req?.symbol||''}
+
+  function updateDigitProbabilities(symbol){
+    const counts=digitCounts[symbol]||Array(10).fill(0);
+    const total=counts.slice(1).reduce((a,b)=>a+b,0)||1;
+    document.querySelectorAll('.gx-digit-circles').forEach(root=>{
+      root.querySelectorAll('.gx-digit-circle').forEach(b=>{const d=Number(b.dataset.digit);const pct=Math.round((counts[d]||0)/total*100);const p=b.querySelector('.gx-pct');if(p)p.textContent=pct+'%';});
+    });
+  }
+
+  function updateLiveCircles(symbol,price,prev){
+    const n=Number(price); if(!Number.isFinite(n))return;
+    const digit=Number(String(n).replace(/[^0-9]/g,'').slice(-1));
+    if(Number.isFinite(digit)&&digit>=0&&digit<=9){if(!digitCounts[symbol])digitCounts[symbol]=Array(10).fill(0);digitCounts[symbol][digit]++;updateDigitProbabilities(symbol);}
+    const direction=prev==null?null:(n>Number(prev)?'CALL':n<Number(prev)?'PUT':null);
+    const parity=Number.isFinite(digit)?(digit%2?'DIGITODD':'DIGITEVEN'):null;
+
+    document.querySelectorAll('.gx-circle').forEach(b=>{
+      const target=b.dataset.target, val=b.dataset.val;
+      let live=false;
+      if(target==='riseType'&&direction)live=val===direction;
+      if(target==='eoType'&&parity)live=val===parity;
+      if(target==='ouType'&&/^DIGIT/.test(val)&&Number.isFinite(digit)){
+        const barrier=Number($g('ouBarrier')?.value??5);
+        live=val==='DIGITOVER'?digit>barrier:digit<barrier;
+      }
+      b.classList.toggle('gx-live-hit',live);
+      if(live)b.setAttribute('data-live','LIVE');else b.removeAttribute('data-live');
+    });
+
+    document.querySelectorAll('.gx-digit-circle').forEach(b=>{
+      b.classList.toggle('gx-live-digit',Number(b.textContent)===digit);
+    });
+
+    const bulkType=$g('bulkType')?.value;
+    document.querySelectorAll('#bulkContractCircles .gx-circle').forEach(b=>{
+      const live=b.dataset.ct===direction||b.dataset.ct===parity;
+      b.classList.toggle('gx-live-hit',!!live);
+    });
+    document.querySelectorAll('#bulkDigitCircles .gx-digit-circle').forEach(b=>b.classList.toggle('gx-live-digit',Number(b.textContent)===digit));
+
+    setLiveText('manualConnectionPill','LIVE • '+symbol);
+    setLiveText('publicStatusText','MARKET DATA LIVE');
+  }
+
+  function ensureMiniChart(id,symbol){
+    const el=$g(id); if(!el||!window.LightweightCharts)return null;
+    if(graphState[id]?.symbol===symbol)return graphState[id];
+    if(graphState[id]?.chart){try{graphState[id].chart.remove()}catch(e){}}
+    el.innerHTML='';
+    const chart=LightweightCharts.createChart(el,{autoSize:true,layout:{background:{color:'#050b11'},textColor:'#82909e'},grid:{vertLines:{color:'#101a23'},horzLines:{color:'#101a23'}},rightPriceScale:{borderColor:'#1c2a35',autoScale:true},timeScale:{borderColor:'#1c2a35',timeVisible:true,secondsVisible:true,rightOffset:3}});
+    const series=chart.addLineSeries({lineWidth:2});
+    graphState[id]={chart,series,symbol};
+    return graphState[id];
+  }
+
+  function requestMiniGraph(id,symbol,labelId){
+    if(!symbol)return;
+    const st=ensureMiniChart(id,symbol); if(!st)return;
+    setLiveText(labelId,symbol);
+    st.series.setData([]);
+    st.waiting=true;
+    const req=++liveSeq;
+    liveSubs.set(req,{kind:'mini-history',id,symbol});
+    sendLive({ticks_history:symbol,end:'latest',count:120,style:'ticks',req_id:req});
+    const tickReq=++liveSeq;
+    liveSubs.set(tickReq,{kind:'mini-tick',id,symbol});
+    sendLive({ticks:symbol,subscribe:1,req_id:tickReq});
+  }
+
+  function syncMiniGraphs(){
+    requestMiniGraph('ouGraph',$g('ouMarket')?.value||window.current||'','ouGraphSymbol');
+    requestMiniGraph('eoGraph',$g('eoMarket')?.value||window.current||'','eoGraphSymbol');
+    requestMiniGraph('riseGraph',$g('riseMarket')?.value||window.current||'','riseGraphSymbol');
+    requestMiniGraph('bulkGraph',$g('bulkGraphMarket')?.value||window.current||'','bulkGraphSymbol');
+  }
+
+  function setLiveMarkets(list){
+    if(typeof window.setMarkets==='function')window.setMarkets(list);
+    else if(typeof setMarkets==='function')setMarkets(list);
+    const normalized=(list||[]).map(m=>({symbol:m.symbol||m.underlying_symbol,display_name:m.display_name||m.underlying_symbol_name||m.symbol||m.underlying_symbol,...m})).filter(m=>m.symbol);
+    ['bulkGraphMarket'].forEach(id=>{
+      const s=$g(id); if(!s)return;
+      const cur=s.value||window.current||normalized[0]?.symbol||'';
+      s.innerHTML=normalized.map(m=>`<option value="${String(m.symbol).replace(/"/g,'&quot;')}">${String(m.display_name||m.symbol).replace(/[<>&]/g,'')}</option>`).join('');
+      if(cur)s.value=cur;
+    });
+    syncMiniGraphs();
+  }
+
+  function handleLive(d){
+    if(d.error){console.warn('Deriv live feed:',d.error.message);return}
+    if(d.msg_type==='active_symbols'){setLiveMarkets(d.active_symbols||[]);return}
+    if(d.msg_type==='history'&&d.history){
+      const sym=symbolOfHistory(d);
+      const times=d.history.times||[], prices=d.history.prices||[];
+      if(sym){const c=Array(10).fill(0);for(const pr of prices){const ds=String(pr).replace(/[^0-9]/g,'');const dg=Number(ds.slice(-1));if(Number.isFinite(dg)&&dg>=0&&dg<=9)c[dg]++;}digitCounts[sym]=c;updateDigitProbabilities(sym);}
+      const req=d.echo_req?.req_id;
+      const meta=liveSubs.get(req);
+      if(meta?.kind==='mini-history'){
+        const st=graphState[meta.id];
+        if(st&&st.symbol===sym){
+          st.series.setData(times.map((t,i)=>({time:Number(t),value:Number(prices[i])})).filter(x=>Number.isFinite(x.time)&&Number.isFinite(x.value)));
+          st.chart.timeScale().fitContent(); st.waiting=false;
+        }
+      }
+      return;
+    }
+    if(d.msg_type==='tick'&&d.tick){
+      const sym=symbolOfTick(d.tick),q=Number(d.tick.quote),ep=Number(d.tick.epoch);
+      if(!Number.isFinite(q))return;
+      if(window.gxFeedTickTape)window.gxFeedTickTape(sym,q,ep);
+      const prev=last.symbol===sym?last.price:null;
+      last.symbol=sym;last.prev=prev;last.price=q;last.epoch=ep;
+      updateLiveCircles(sym,q,prev);
+      ['ouGraph','eoGraph','riseGraph','bulkGraph'].forEach(id=>{
+        const st=graphState[id];if(st&&st.symbol===sym){try{st.series.update({time:ep,value:q})}catch(e){}}
+      });
+      if(sym===window.current){
+        setLiveText('dashPrice',q.toFixed(5));
+        setLiveText('dashPriceTime',new Date(ep*1000).toLocaleTimeString());
+      }
+    }
+  }
+
+  function connectLive(){
+    clearTimeout(liveReconnect);
+    if(liveSocket&&liveSocket.readyState===WebSocket.OPEN)return;
+    try{if(liveSocket)liveSocket.close()}catch(e){}
+    liveSocket=new WebSocket(LIVE_WS);
+    liveSocket.onopen=()=>{
+      const st=$g('publicStatus');if(st){st.className='connection';const sp=st.querySelector('span');if(sp)sp.textContent='DERIV LIVE';}
+      sendLive({active_symbols:'brief',req_id:++liveSeq});
+      setTimeout(syncMiniGraphs,700);
+    };
+    liveSocket.onmessage=e=>{try{handleLive(JSON.parse(e.data))}catch(err){console.warn(err)}};
+    liveSocket.onerror=()=>{const st=$g('publicStatus');if(st){st.className='connection off';const sp=st.querySelector('span');if(sp)sp.textContent='LIVE ERROR'}};
+    liveSocket.onclose=()=>{const st=$g('publicStatus');if(st){st.className='connection off';const sp=st.querySelector('span');if(sp)sp.textContent='RECONNECTING'};liveReconnect=setTimeout(connectLive,2000)};
+  }
+
+  function wire(){
+    ['ouMarket','eoMarket','riseMarket','bulkGraphMarket'].forEach(id=>{
+      const e=$g(id);if(e)e.addEventListener('change',syncMiniGraphs);
+    });
+    document.addEventListener('click',e=>{
+      if(e.target.closest('.gx-circle,.gx-digit-circle'))setTimeout(syncMiniGraphs,80);
+    });
+    connectLive();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
+  window.GOON_LIVE={connect:connectLive,sync:syncMiniGraphs};
+})();
+</script>
+
+</body></html>
