@@ -12,15 +12,12 @@ const DERIV_REDIRECT_URI=process.env.DERIV_REDIRECT_URI||'https://goonfx.com/cal
 const DERIV_APP_ID=process.env.DERIV_APP_ID||DERIV_CLIENT_ID;
 const SESSION_SECRET=process.env.SESSION_SECRET||'';
 const DERIV_API='https://api.derivws.com';
-
 app.set('trust proxy',1);
 app.use(cors({origin:FRONTEND_ORIGIN,credentials:true,methods:['GET','POST','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
 app.use(express.json({limit:'300kb'}));
-
-app.get('/',(_,r)=>r.json({ok:true,service:'GOON FX API',version:'4.0.0',status:'online'}));
-app.get('/health',(_,r)=>r.json({ok:true,service:'goonfx-api',version:'4.0.0'}));
+app.get('/',(_,r)=>r.json({ok:true,service:'GOON FX API',version:'4.1.0',status:'online'}));
+app.get('/health',(_,r)=>r.json({ok:true,service:'goonfx-api',version:'4.1.0'}));
 app.get('/api/config-status',(_,r)=>{const missing=[];if(!DERIV_CLIENT_ID)missing.push('DERIV_CLIENT_ID');if(!DERIV_REDIRECT_URI)missing.push('DERIV_REDIRECT_URI');if(!SESSION_SECRET)missing.push('SESSION_SECRET');if(!DERIV_APP_ID)missing.push('DERIV_APP_ID');r.status(missing.length?503:200).json({ok:!missing.length,missing,frontend_origin:FRONTEND_ORIGIN,oauth_client_configured:!!DERIV_CLIENT_ID,oauth_secret_configured:!!DERIV_CLIENT_SECRET,redirect_uri:DERIV_REDIRECT_URI,app_id_configured:!!DERIV_APP_ID,session_secret_configured:!!SESSION_SECRET,oauth_mode:'PKCE'});});
-
 const key=()=>crypto.createHash('sha256').update(SESSION_SECRET).digest();
 function seal(v){const iv=crypto.randomBytes(12),c=crypto.createCipheriv('aes-256-gcm',key(),iv),e=Buffer.concat([c.update(v,'utf8'),c.final()]);return Buffer.concat([iv,c.getAuthTag(),e]).toString('base64url');}
 function open(v){const b=Buffer.from(v,'base64url'),d=crypto.createDecipheriv('aes-256-gcm',key(),b.subarray(0,12));d.setAuthTag(b.subarray(12,28));return Buffer.concat([d.update(b.subarray(28)),d.final()]).toString('utf8');}
@@ -28,61 +25,21 @@ function cookieToken(req){const raw=(req.headers.cookie||'').match(/(?:^|; )gx_t
 function setSession(res,t,e){const maxAge=Math.min(Math.max(Number(e||3600),300),86400);res.setHeader('Set-Cookie',`gx_token=${seal(JSON.stringify({token:t,exp:Date.now()+maxAge*1000}))}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);return maxAge;}
 function clearSession(res){res.setHeader('Set-Cookie','gx_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0');}
 function fail(res,e,code=400){res.status(e.status||code).json({error:e.message||'Request failed',details:e.data||null});}
-
-async function derivToken({code,code_verifier}){
- const p=new URLSearchParams({grant_type:'authorization_code',client_id:DERIV_CLIENT_ID,code,code_verifier,redirect_uri:DERIV_REDIRECT_URI});
- if(DERIV_CLIENT_SECRET)p.set('client_secret',DERIV_CLIENT_SECRET);
- const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p});
- const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={error:text}};
- if(!r.ok){const e=new Error(d.error_description||d.error||`Deriv token exchange HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}
- if(!d.access_token)throw new Error('Deriv did not return an access token');
- return d;
-}
-
-app.post('/api/oauth/exchange',async(req,res)=>{try{
- const missing=[];if(!DERIV_CLIENT_ID)missing.push('DERIV_CLIENT_ID');if(!DERIV_REDIRECT_URI)missing.push('DERIV_REDIRECT_URI');if(!SESSION_SECRET)missing.push('SESSION_SECRET');if(!DERIV_APP_ID)missing.push('DERIV_APP_ID');
- if(missing.length)throw new Error(`OAuth backend incomplete: missing ${missing.join(', ')}`);
- const {code,code_verifier,redirect_uri,client_id}=req.body||{};
- if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing');
- if(redirect_uri!==DERIV_REDIRECT_URI)throw new Error('Redirect URI mismatch');
- if(client_id!==DERIV_CLIENT_ID)throw new Error('OAuth client ID mismatch');
- const t=await derivToken({code,code_verifier});
- res.json({ok:true,expires_in:setSession(res,t.access_token,t.expires_in)});
-}catch(e){fail(res,e)}});
+async function derivToken({code,code_verifier}){const p=new URLSearchParams({grant_type:'authorization_code',client_id:DERIV_CLIENT_ID,code,code_verifier,redirect_uri:DERIV_REDIRECT_URI});if(DERIV_CLIENT_SECRET)p.set('client_secret',DERIV_CLIENT_SECRET);const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p});const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={error:text}}if(!r.ok){const e=new Error(d.error_description||d.error||`Deriv token exchange HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}if(!d.access_token)throw new Error('Deriv did not return an access token');return d;}
+app.post('/api/oauth/exchange',async(req,res)=>{try{const missing=[];if(!DERIV_CLIENT_ID)missing.push('DERIV_CLIENT_ID');if(!DERIV_REDIRECT_URI)missing.push('DERIV_REDIRECT_URI');if(!SESSION_SECRET)missing.push('SESSION_SECRET');if(!DERIV_APP_ID)missing.push('DERIV_APP_ID');if(missing.length)throw new Error(`OAuth backend incomplete: missing ${missing.join(', ')}`);const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing');if(redirect_uri!==DERIV_REDIRECT_URI)throw new Error('Redirect URI mismatch');if(client_id!==DERIV_CLIENT_ID)throw new Error('OAuth client ID mismatch');const t=await derivToken({code,code_verifier});res.json({ok:true,expires_in:setSession(res,t.access_token,t.expires_in)});}catch(e){fail(res,e)}});
 app.post('/api/logout',(_,r)=>{clearSession(r);r.json({ok:true})});
-
-async function rest(path,token,options={}){
- const r=await fetch(`${DERIV_API}${path}`,{...options,headers:{Authorization:`Bearer ${token}`,'Deriv-App-ID':DERIV_APP_ID,...(options.headers||{})}});
- const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={raw:text}};
- if(!r.ok){const e=new Error(d?.errors?.[0]?.message||d?.message||`Deriv API HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}
- return d;
-}
-
+async function rest(path,token,options={}){const r=await fetch(`${DERIV_API}${path}`,{...options,headers:{Authorization:`Bearer ${token}`,'Deriv-App-ID':DERIV_APP_ID,...(options.headers||{})}});const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={raw:text}}if(!r.ok){const e=new Error(d?.errors?.[0]?.message||d?.message||`Deriv API HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}return d;}
 function ws(url,payload){return new Promise((resolve,reject)=>{const w=new WebSocket(url);const timer=setTimeout(()=>{try{w.close()}catch{};reject(new Error('Deriv WebSocket timeout'))},15000);let done=false;const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(timer);try{w.close()}catch{};fn(v)};w.on('open',()=>w.send(JSON.stringify(payload)));w.on('message',raw=>{let d;try{d=JSON.parse(raw)}catch{return}if(d.error){const e=new Error(d.error.message||'Deriv WebSocket error');e.data=d;return finish(reject,e)}finish(resolve,d)});w.on('error',e=>finish(reject,e));});}
-
 async function accounts(token){const d=await rest('/trading/v1/options/accounts',token);const data=d?.data;return Array.isArray(data)?data:(data?[data]:[]);}
 async function resolveAccount(token,requested){const list=await accounts(token);if(!list.length)throw new Error('No Deriv Options account is available for this login');if(requested){const found=list.find(a=>String(a.account_id)===String(requested));if(!found)throw new Error('Selected Deriv account is unavailable');return found;}return list[0];}
-async function authWs(token,requested,payload){const account=await resolveAccount(token,requested);const otp=await rest(`/trading/v1/options/accounts/${encodeURIComponent(account.account_id)}/otp`,token,{method:'POST'});if(!otp?.data?.url)throw new Error('Deriv did not return an authenticated WebSocket URL');const result=await ws(otp.data.url,payload);return {...result,account:account};}
-
+async function authWs(token,requested,payload){const account=await resolveAccount(token,requested);const otp=await rest(`/trading/v1/options/accounts/${encodeURIComponent(account.account_id)}/otp`,token,{method:'POST'});if(!otp?.data?.url)throw new Error('Deriv did not return an authenticated WebSocket URL');const result=await ws(otp.data.url,payload);return {...result,account};}
 app.get('/api/account',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected'});const list=await accounts(t);res.json({ok:true,accounts:list,selected:list[0]?.account_id||null});}catch(e){fail(res,e,502)}});
-
 app.get('/api/markets',async(_,res)=>{try{const d=await ws('wss://api.derivws.com/trading/v1/options/ws/public',{active_symbols:'full'});res.json({ok:true,markets:d.active_symbols||[]});}catch(e){fail(res,e,502)}});
 app.get('/api/markets/:symbol/ticks',async(req,res)=>{try{const d=await ws('wss://api.derivws.com/trading/v1/options/ws/public',{ticks_history:req.params.symbol,count:Math.min(Math.max(Number(req.query.count||100),10),1000),end:'latest',style:'ticks'});res.json({ok:true,symbol:req.params.symbol,history:d.history||null});}catch(e){fail(res,e,502)}});
-
 const TYPES=['DIGITMATCH','DIGITDIFF','DIGITEVEN','DIGITODD','DIGITOVER','DIGITUNDER','HIGHER','LOWER','ONETOUCH','NOTOUCH','MULTUP','MULTDOWN','UPORDOWN','ACCU','TURBOSLONG','TURBOSSHORT','VANILLALONGCALL','VANILLALONGPUT','CALL','PUT'];
 const ALIASES={MATCHES:'DIGITMATCH',MATCH:'DIGITMATCH',DIFFERS:'DIGITDIFF',DIFFER:'DIGITDIFF','EVEN/ODD':'DIGITEVEN',EVEN:'DIGITEVEN',ODD:'DIGITODD','OVER/UNDER':'DIGITOVER',OVER:'DIGITOVER',UNDER:'DIGITUNDER','HIGHER/LOWER':'HIGHER',TOUCH:'ONETOUCH','NO_TOUCH':'NOTOUCH','NO-TOUCH':'NOTOUCH'};
-
-app.post('/api/proposal',async(req,res)=>{try{
- const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});
- const b=req.body||{};const type=ALIASES[String(b.contract_type||'').toUpperCase()]||String(b.contract_type||'').toUpperCase();
- if(!TYPES.includes(type))return res.status(400).json({error:`Unsupported contract type: ${type}`});
- const p={proposal:1,amount:Number(b.amount??b.stake??1),basis:b.basis||'stake',contract_type:type,currency:b.currency||'USD',duration:Number(b.duration||1),duration_unit:b.duration_unit||'t',underlying_symbol:b.underlying_symbol||b.symbol||'R_100'};
- for(const k of ['barrier','barrier2','multiplier','growth_rate','selected_tick','payout_per_point'])if(b[k]!==undefined&&b[k]!=='')p[k]=b[k];
- const result=await authWs(t,b.account_id,p);res.json(result);
-}catch(e){fail(res,e)}});
-
+app.post('/api/proposal',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};const type=ALIASES[String(b.contract_type||'').toUpperCase()]||String(b.contract_type||'').toUpperCase();if(!TYPES.includes(type))return res.status(400).json({error:`Unsupported contract type: ${type}`});const p={proposal:1,amount:Number(b.amount??b.stake??1),basis:b.basis||'stake',contract_type:type,currency:b.currency||'USD',duration:Number(b.duration||1),duration_unit:b.duration_unit||'t',underlying_symbol:b.underlying_symbol||b.symbol||'R_100'};for(const k of ['barrier','barrier2','multiplier','growth_rate','selected_tick','payout_per_point'])if(b[k]!==undefined&&b[k]!=='')p[k]=b[k];const result=await authWs(t,b.account_id,p);res.json(result);}catch(e){fail(res,e)}});
 app.post('/api/buy',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};if(!b.proposal_id)throw new Error('Proposal ID is missing');if(!Number.isFinite(Number(b.price)))throw new Error('Purchase price is missing');res.json(await authWs(t,b.account_id,{buy:String(b.proposal_id),price:Number(b.price),subscribe:1}));}catch(e){fail(res,e)}});
 app.post('/api/sell',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};if(!b.contract_id)throw new Error('Contract ID is missing');res.json(await authWs(t,b.account_id,{sell:String(b.contract_id),price:Number(b.price||0)}));}catch(e){fail(res,e)}});
 app.post('/api/portfolio',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});res.json(await authWs(t,req.body?.account_id,{portfolio:1,subscribe:1}));}catch(e){fail(res,e)}});
-
 export default app;
