@@ -18,4 +18,4 @@ Multi-page frontend for a Deriv OAuth trading workspace.
 
 The frontend can be served from GitHub Pages. The OAuth token exchange cannot run on GitHub Pages; deploy `backend/` to an HTTPS Node service and set `BACKEND_URL` in `config.js` to that service.
 
-Deployment trigger refreshed after OAuth/session and trading execution updates.
+Production deployment trigger: OAuth redirect, account selection, live balance, and Deriv feed integration updated.
