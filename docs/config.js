@@ -1,13 +1,23 @@
 window.GOONFX_CONFIG={
   DERIV_CLIENT_ID:'34b2ctEChXoL5t579q8pB',
   DERIV_APP_ID:'34b2ctEChXoL5t579q8pB',
-  // This OAuth client is authorized for trading. Account creation/management
-  // is intentionally not requested because Deriv rejects account_manage for
-  // this client. Reading the authenticated Options account and trading use
-  // the trade scope.
   DERIV_SCOPE:'trade',
   DERIV_REST_BASE:'https://api.derivws.com',
   DERIV_REDIRECT_URI:'https://goonfx.com/callback.html',
   BACKEND_URL:'https://api.goonfx.com',
   GOOGLE_CLIENT_ID:'YOUR_GOOGLE_CLIENT_ID'
 };
+
+/* Shared, persistent Deriv market feed patch for existing trading pages. */
+(function(){
+  const WS_URL='wss://api.derivws.com/trading/v1/options/ws/public';
+  let stable=null,retryTimer=null,attempt=0,currentSymbol=null,manualPage=false;
+  const get=id=>document.getElementById(id);
+  function draw(prices){const c=get('chart');if(!c||!prices.length)return;const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,r.width,r.height);const min=Math.min(...prices),max=Math.max(...prices),range=max-min||1,p=18;x.strokeStyle='#1b1b1b';for(let i=0;i<6;i++){const y=p+i*(r.height-2*p)/5;x.beginPath();x.moveTo(0,y);x.lineTo(r.width,y);x.stroke()}x.beginPath();prices.forEach((v,i)=>{const xx=p+i*(r.width-2*p)/(prices.length-1||1),yy=r.height-p-(v-min)/range*(r.height-2*p);i?x.lineTo(xx,yy):x.moveTo(xx,yy)});x.strokeStyle='#ff2633';x.lineWidth=2;x.stroke()}
+  function schedule(){if(retryTimer)return;const delay=Math.min(15000,1000*Math.pow(2,attempt++));retryTimer=setTimeout(()=>{retryTimer=null;connect()},delay)}
+  function connect(){if(!manualPage)return;if(stable&&(stable.readyState===WebSocket.OPEN||stable.readyState===WebSocket.CONNECTING))return;stable=new WebSocket(WS_URL);stable.onopen=()=>{attempt=0;const live=document.querySelector('.charthead .live');if(live)live.textContent='● LIVE';if(currentSymbol){stable.send(JSON.stringify({ticks_history:currentSymbol,count:180,end:'latest',style:'ticks',req_id:101}));stable.send(JSON.stringify({ticks:currentSymbol,subscribe:1,req_id:102}))}else stable.send(JSON.stringify({active_symbols:'full',req_id:100}));};stable.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch{return}if(d.error){schedule();return}if(d.msg_type==='active_symbols'){const sel=get('symbol');if(sel){const list=(d.active_symbols||[]).filter(s=>s.underlying_symbol||s.symbol);if(list.length){const old=sel.value;sel.innerHTML=list.map(s=>{const code=s.underlying_symbol||s.symbol,name=s.underlying_symbol_name||s.display_name||code;return `<option value="${code}">${name}</option>`}).join('');currentSymbol=list.some(s=>(s.underlying_symbol||s.symbol)===old)?old:(list.find(s=>(s.underlying_symbol||s.symbol)==='R_100')?.underlying_symbol||list[0].underlying_symbol||list[0].symbol);sel.value=currentSymbol;stable.send(JSON.stringify({ticks_history:currentSymbol,count:180,end:'latest',style:'ticks',req_id:101}));stable.send(JSON.stringify({ticks:currentSymbol,subscribe:1,req_id:102}));}}}if(d.msg_type==='history'&&d.history?.prices){window.__goonfxPrices=d.history.prices.map(Number);draw(window.__goonfxPrices)}if(d.msg_type==='tick'&&d.tick){const q=Number(d.tick.quote);window.__goonfxPrices=window.__goonfxPrices||[];window.__goonfxPrices.push(q);if(window.__goonfxPrices.length>180)window.__goonfxPrices.shift();const p=get('price');if(p)p.textContent=q;const title=get('chartTitle');if(title&&get('symbol'))title.textContent=get('symbol').selectedOptions[0]?.textContent+' · '+q;draw(window.__goonfxPrices);const live=document.querySelector('.charthead .live');if(live)live.textContent='● LIVE';}}
+    stable.onerror=()=>{};stable.onclose=()=>{const live=document.querySelector('.charthead .live');if(live)live.textContent='● RECONNECTING';schedule()};
+  }
+  function patch(){manualPage=!!get('proposalBtn')&&!!get('symbol');if(!manualPage)return;currentSymbol=get('symbol').value;const old=window.connectChart;window.connectChart=function(sym){currentSymbol=sym;if(stable&&stable.readyState===WebSocket.OPEN){stable.send(JSON.stringify({forget_all:'ticks'}));stable.send(JSON.stringify({ticks_history:sym,count:180,end:'latest',style:'ticks',req_id:201}));stable.send(JSON.stringify({ticks:sym,subscribe:1,req_id:202}));}else connect()};get('symbol').onchange=e=>window.connectChart(e.target.value);connect();const digitFamily=document.querySelector('[data-family="digits"]');if(digitFamily){const types=get('types');if(types){const wanted=[['Over','DIGITOVER'],['Under','DIGITUNDER'],['Even','DIGITEVEN'],['Odd','DIGITODD'],['Matches','DIGITMATCH'],['Differs','DIGITDIFF']];types.innerHTML='';wanted.forEach(([label,type])=>{const b=document.createElement('button');b.textContent=label;b.dataset.type=type;b.className=type===currentType?'active':'';b.onclick=()=>{currentType=type;renderTypes();renderFields()};types.appendChild(b)});}}}
+  window.addEventListener('DOMContentLoaded',patch);
+})();
