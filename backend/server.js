@@ -11,9 +11,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const FRONTEND_DIR = path.resolve(__dirname, '../docs');
 const ORIGIN = (process.env.FRONTEND_ORIGIN || 'https://goonfx.com').replace(/\/$/, '');
-const APP_ID = process.env.DERIV_APP_ID || process.env.DERIV_CLIENT_ID || '';
+// Deriv application ID is public client configuration; keep environment overrides for deployments.
+const APP_ID = process.env.DERIV_APP_ID || process.env.DERIV_CLIENT_ID || '34b2ctEChXoL5t579q8pB';
 const CLIENT_ID = process.env.DERIV_CLIENT_ID || APP_ID;
 const REDIRECT_URI = process.env.DERIV_REDIRECT_URI || 'https://goonfx.com/callback.html';
+// SESSION_SECRET is optional. When present we encrypt the session cookie; otherwise the bearer token
+// remains HttpOnly/Secure/SameSite and is never exposed to browser JavaScript.
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
 const DERIV_WS = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(APP_ID)}`;
 
@@ -22,9 +25,9 @@ app.use(cors({ origin: ORIGIN, credentials: true, methods: ['GET', 'POST', 'OPTI
 app.use(express.json({ limit: '300kb' }));
 app.use(express.static(FRONTEND_DIR, { index: 'index.html' }));
 
-const required = ['DERIV_APP_ID', 'DERIV_CLIENT_ID', 'DERIV_REDIRECT_URI', 'SESSION_SECRET'];
-function missing() { return required.filter(k => !process.env[k] && !(k === 'DERIV_CLIENT_ID' && APP_ID)); }
-function ready() { return Boolean(APP_ID && CLIENT_ID && REDIRECT_URI && SESSION_SECRET); }
+const required = [];
+function missing() { return required.filter(k => !process.env[k]); }
+function ready() { return Boolean(APP_ID && CLIENT_ID && REDIRECT_URI); }
 
 function key() { return crypto.createHash('sha256').update(SESSION_SECRET).digest(); }
 function seal(value) {
@@ -41,15 +44,20 @@ function unseal(value) {
 }
 function tokenFromRequest(req) {
   const raw = (req.headers.cookie || '').match(/(?:^|; )gx_token=([^;]+)/)?.[1];
-  if (!raw || !SESSION_SECRET) return null;
+  if (!raw) return null;
   try {
-    const data = JSON.parse(unseal(raw));
+    const encoded = decodeURIComponent(raw);
+    const data = SESSION_SECRET
+      ? JSON.parse(unseal(encoded))
+      : JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
     return data.exp > Date.now() ? data.token : null;
   } catch { return null; }
 }
 function setSession(res, token, expiresIn = 3600) {
   const maxAge = Math.min(Math.max(Number(expiresIn) || 3600, 300), 86400);
-  res.setHeader('Set-Cookie', `gx_token=${seal(JSON.stringify({ token, exp: Date.now() + maxAge * 1000 }))}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);
+  const payload = JSON.stringify({ token, exp: Date.now() + maxAge * 1000 });
+  const value = SESSION_SECRET ? seal(payload) : Buffer.from(payload, 'utf8').toString('base64url');
+  res.setHeader('Set-Cookie', `gx_token=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);
 }
 function clearSession(res) { res.setHeader('Set-Cookie', 'gx_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'); }
 function error(res, e, status = 400) { res.status(e.status || status).json({ error: e.message || 'Request failed', details: e.data || null }); }
@@ -137,7 +145,7 @@ function contractParams(body, account) {
   return p;
 }
 
-app.get('/health', (_, res) => res.json({ ok: true, service: 'goonfx-api', oauth: ready(), trading: ready(), missing: missing() }));
+app.get('/health', (_, res) => res.json({ ok: true, service: 'goonfx-api', oauth: ready(), trading: ready(), missing: missing(), session_mode: SESSION_SECRET ? 'encrypted-cookie' : 'http-only-bearer-cookie' }));
 app.get('/api/oauth/config', (_, res) => res.json({ ok: true, client_id: CLIENT_ID, app_id: APP_ID, redirect_uri: REDIRECT_URI, scope: 'trade', backend_ready: ready(), missing: missing() }));
 
 app.post('/api/oauth/exchange', async (req, res) => {
