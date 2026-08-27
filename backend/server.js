@@ -2,9 +2,13 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import WebSocket from 'ws';
 
 const app=express();
+const __filename=fileURLToPath(import.meta.url);
+const __dirname=path.dirname(__filename);
 const FRONTEND_ORIGIN=(process.env.FRONTEND_ORIGIN||'https://goonfx.com').replace(/\/$/,'');
 const DERIV_CLIENT_ID=process.env.DERIV_CLIENT_ID||'';
 const DERIV_CLIENT_SECRET=process.env.DERIV_CLIENT_SECRET||'';
@@ -13,11 +17,18 @@ const DERIV_APP_ID=process.env.DERIV_APP_ID||DERIV_CLIENT_ID;
 const SESSION_SECRET=process.env.SESSION_SECRET||'';
 const PUBLIC_WS='wss://ws.binaryws.com/websockets/v3';
 const DERIV_API='https://api.derivws.com';
+const FRONTEND_DIR=path.resolve(__dirname,'../docs');
 app.set('trust proxy',1);
 app.use(cors({origin:FRONTEND_ORIGIN,credentials:true,methods:['GET','POST','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
 app.use(express.json({limit:'300kb'}));
-app.get('/',(_,r)=>r.json({ok:true,service:'GOON FX API',version:'4.2.0',status:'online'}));
-app.get('/health',(_,r)=>r.json({ok:true,service:'goonfx-api',version:'4.2.0'}));
+
+// The Vercel project currently has the backend directory as its root. Serve the
+// committed GOON FX frontend from ../docs so the same production deployment can
+// serve goonfx.com while retaining api.goonfx.com API routes.
+app.use(express.static(FRONTEND_DIR,{index:'index.html',fallthrough:true}));
+
+app.get('/',(req,res)=>{if(req.hostname==='api.goonfx.com')return res.json({ok:true,service:'GOON FX API',version:'4.3.0',status:'online'});return res.sendFile(path.join(FRONTEND_DIR,'index.html'))});
+app.get('/health',(_,r)=>r.json({ok:true,service:'goonfx-api',version:'4.3.0'}));
 app.get('/api/config-status',(_,r)=>{const missing=[];if(!DERIV_CLIENT_ID)missing.push('DERIV_CLIENT_ID');if(!DERIV_REDIRECT_URI)missing.push('DERIV_REDIRECT_URI');if(!SESSION_SECRET)missing.push('SESSION_SECRET');if(!DERIV_APP_ID)missing.push('DERIV_APP_ID');r.status(missing.length?503:200).json({ok:!missing.length,missing,frontend_origin:FRONTEND_ORIGIN,oauth_client_configured:!!DERIV_CLIENT_ID,oauth_secret_configured:!!DERIV_CLIENT_SECRET,redirect_uri:DERIV_REDIRECT_URI,app_id_configured:!!DERIV_APP_ID,session_secret_configured:!!SESSION_SECRET,oauth_mode:'PKCE'});});
 const key=()=>crypto.createHash('sha256').update(SESSION_SECRET).digest();
 function seal(v){const iv=crypto.randomBytes(12),c=crypto.createCipheriv('aes-256-gcm',key(),iv),e=Buffer.concat([c.update(v,'utf8'),c.final()]);return Buffer.concat([iv,c.getAuthTag(),e]).toString('base64url');}
@@ -29,7 +40,7 @@ function fail(res,e,code=400){res.status(e.status||code).json({error:e.message||
 async function derivToken({code,code_verifier}){const p=new URLSearchParams({grant_type:'authorization_code',client_id:DERIV_CLIENT_ID,code,code_verifier,redirect_uri:DERIV_REDIRECT_URI});if(DERIV_CLIENT_SECRET)p.set('client_secret',DERIV_CLIENT_SECRET);const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p});const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={error:text}}if(!r.ok){const e=new Error(d.error_description||d.error||`Deriv token exchange HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}if(!d.access_token)throw new Error('Deriv did not return an access token');return d;}
 app.post('/api/oauth/exchange',async(req,res)=>{try{const missing=[];if(!DERIV_CLIENT_ID)missing.push('DERIV_CLIENT_ID');if(!DERIV_REDIRECT_URI)missing.push('DERIV_REDIRECT_URI');if(!SESSION_SECRET)missing.push('SESSION_SECRET');if(!DERIV_APP_ID)missing.push('DERIV_APP_ID');if(missing.length)throw new Error(`OAuth backend incomplete: missing ${missing.join(', ')}`);const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing');if(redirect_uri!==DERIV_REDIRECT_URI)throw new Error('Redirect URI mismatch');if(client_id!==DERIV_CLIENT_ID)throw new Error('OAuth client ID mismatch');const t=await derivToken({code,code_verifier});res.json({ok:true,expires_in:setSession(res,t.access_token,t.expires_in)});}catch(e){fail(res,e)}});
 app.post('/api/logout',(_,r)=>{clearSession(r);r.json({ok:true})});
-async function rest(path,token,options={}){const r=await fetch(`${DERIV_API}${path}`,{...options,headers:{Authorization:`Bearer ${token}`,'Deriv-App-ID':DERIV_APP_ID,...(options.headers||{})}});const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={raw:text}}if(!r.ok){const e=new Error(d?.errors?.[0]?.message||d?.message||`Deriv API HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}return d;}
+async function rest(pathname,token,options={}){const r=await fetch(`${DERIV_API}${pathname}`,{...options,headers:{Authorization:`Bearer ${token}`,'Deriv-App-ID':DERIV_APP_ID,...(options.headers||{})}});const text=await r.text();let d;try{d=JSON.parse(text)}catch{d={raw:text}}if(!r.ok){const e=new Error(d?.errors?.[0]?.message||d?.message||`Deriv API HTTP ${r.status}`);e.status=r.status;e.data=d;throw e;}return d;}
 function ws(url,payload){return new Promise((resolve,reject)=>{const w=new WebSocket(url);const timer=setTimeout(()=>{try{w.close()}catch{};reject(new Error('Deriv WebSocket timeout'))},15000);let done=false;const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(timer);try{w.close()}catch{};fn(v)};w.on('open',()=>w.send(JSON.stringify(payload)));w.on('message',raw=>{let d;try{d=JSON.parse(raw)}catch{return}if(d.error){const e=new Error(d.error.message||'Deriv WebSocket error');e.data=d;return finish(reject,e)}finish(resolve,d)});w.on('error',e=>finish(reject,e));});}
 async function accounts(token){const d=await rest('/trading/v1/options/accounts',token);const data=d?.data;return Array.isArray(data)?data:(data?[data]:[]);}
 async function resolveAccount(token,requested){const list=await accounts(token);if(!list.length)throw new Error('No Deriv Options account is available for this login');if(requested){const found=list.find(a=>String(a.account_id)===String(requested));if(!found)throw new Error('Selected Deriv account is unavailable');return found;}return list[0];}
@@ -45,4 +56,8 @@ app.post('/api/proposal',async(req,res)=>{try{const t=cookieToken(req);if(!t)ret
 app.post('/api/buy',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};if(!b.proposal_id)throw new Error('Proposal ID is missing');if(!Number.isFinite(Number(b.price)))throw new Error('Purchase price is missing');res.json(await authWs(t,b.account_id,{buy:String(b.proposal_id),price:Number(b.price),subscribe:1}));}catch(e){fail(res,e)}});
 app.post('/api/sell',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};if(!b.contract_id)throw new Error('Contract ID is missing');res.json(await authWs(t,b.account_id,{sell:String(b.contract_id),price:Number(b.price||0)}));}catch(e){fail(res,e)}});
 app.post('/api/portfolio',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});res.json(await authWs(t,req.body?.account_id,{portfolio:1,subscribe:1}));}catch(e){fail(res,e)}});
+
+// Frontend fallback: allow direct navigation to any static GOON FX page.
+app.get('*',(req,res,next)=>{if(req.path.startsWith('/api/'))return next();const requested=path.join(FRONTEND_DIR,req.path);if(requested.startsWith(FRONTEND_DIR)&&path.extname(requested))return res.sendFile(requested,err=>err?next():undefined);res.sendFile(path.join(FRONTEND_DIR,'index.html'));});
+
 export default app;
