@@ -4,19 +4,20 @@ import cors from 'cors';
 import crypto from 'node:crypto';
 import WebSocket from 'ws';
 
-const app = express();
+const app=express();
 const FRONTEND_ORIGIN=(process.env.FRONTEND_ORIGIN||'https://goonfx.com').replace(/\/$/,'');
 const DERIV_CLIENT_ID=process.env.DERIV_CLIENT_ID||'';
 const DERIV_CLIENT_SECRET=process.env.DERIV_CLIENT_SECRET||'';
 const DERIV_REDIRECT_URI=process.env.DERIV_REDIRECT_URI||'https://goonfx.com/callback.html';
 const DERIV_APP_ID=process.env.DERIV_APP_ID||DERIV_CLIENT_ID;
 const SESSION_SECRET=process.env.SESSION_SECRET||'';
+const PUBLIC_WS='wss://ws.binaryws.com/websockets/v3';
 const DERIV_API='https://api.derivws.com';
 app.set('trust proxy',1);
 app.use(cors({origin:FRONTEND_ORIGIN,credentials:true,methods:['GET','POST','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
 app.use(express.json({limit:'300kb'}));
-app.get('/',(_,r)=>r.json({ok:true,service:'GOON FX API',version:'4.1.0',status:'online'}));
-app.get('/health',(_,r)=>r.json({ok:true,service:'goonfx-api',version:'4.1.0'}));
+app.get('/',(_,r)=>r.json({ok:true,service:'GOON FX API',version:'4.2.0',status:'online'}));
+app.get('/health',(_,r)=>r.json({ok:true,service:'goonfx-api',version:'4.2.0'}));
 app.get('/api/config-status',(_,r)=>{const missing=[];if(!DERIV_CLIENT_ID)missing.push('DERIV_CLIENT_ID');if(!DERIV_REDIRECT_URI)missing.push('DERIV_REDIRECT_URI');if(!SESSION_SECRET)missing.push('SESSION_SECRET');if(!DERIV_APP_ID)missing.push('DERIV_APP_ID');r.status(missing.length?503:200).json({ok:!missing.length,missing,frontend_origin:FRONTEND_ORIGIN,oauth_client_configured:!!DERIV_CLIENT_ID,oauth_secret_configured:!!DERIV_CLIENT_SECRET,redirect_uri:DERIV_REDIRECT_URI,app_id_configured:!!DERIV_APP_ID,session_secret_configured:!!SESSION_SECRET,oauth_mode:'PKCE'});});
 const key=()=>crypto.createHash('sha256').update(SESSION_SECRET).digest();
 function seal(v){const iv=crypto.randomBytes(12),c=crypto.createCipheriv('aes-256-gcm',key(),iv),e=Buffer.concat([c.update(v,'utf8'),c.final()]);return Buffer.concat([iv,c.getAuthTag(),e]).toString('base64url');}
@@ -34,11 +35,13 @@ async function accounts(token){const d=await rest('/trading/v1/options/accounts'
 async function resolveAccount(token,requested){const list=await accounts(token);if(!list.length)throw new Error('No Deriv Options account is available for this login');if(requested){const found=list.find(a=>String(a.account_id)===String(requested));if(!found)throw new Error('Selected Deriv account is unavailable');return found;}return list[0];}
 async function authWs(token,requested,payload){const account=await resolveAccount(token,requested);const otp=await rest(`/trading/v1/options/accounts/${encodeURIComponent(account.account_id)}/otp`,token,{method:'POST'});if(!otp?.data?.url)throw new Error('Deriv did not return an authenticated WebSocket URL');const result=await ws(otp.data.url,payload);return {...result,account};}
 app.get('/api/account',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected'});const list=await accounts(t);res.json({ok:true,accounts:list,selected:list[0]?.account_id||null});}catch(e){fail(res,e,502)}});
-app.get('/api/markets',async(_,res)=>{try{const d=await ws('wss://api.derivws.com/trading/v1/options/ws/public',{active_symbols:'full'});res.json({ok:true,markets:d.active_symbols||[]});}catch(e){fail(res,e,502)}});
-app.get('/api/markets/:symbol/ticks',async(req,res)=>{try{const d=await ws('wss://api.derivws.com/trading/v1/options/ws/public',{ticks_history:req.params.symbol,count:Math.min(Math.max(Number(req.query.count||100),10),1000),end:'latest',style:'ticks'});res.json({ok:true,symbol:req.params.symbol,history:d.history||null});}catch(e){fail(res,e,502)}});
+app.get('/api/markets',async(_,res)=>{try{const d=await ws(PUBLIC_WS,{active_symbols:'full'});res.json({ok:true,markets:d.active_symbols||[]});}catch(e){fail(res,e,502)}});
+app.get('/api/markets/:symbol/contracts',async(req,res)=>{try{const d=await ws(PUBLIC_WS,{contracts_for:req.params.symbol});res.json({ok:true,symbol:req.params.symbol,contracts:d.contracts_for||{}});}catch(e){fail(res,e,502)}});
+app.get('/api/markets/:symbol/ticks',async(req,res)=>{try{const d=await ws(PUBLIC_WS,{ticks_history:req.params.symbol,count:Math.min(Math.max(Number(req.query.count||100),10),1000),end:'latest',style:'ticks'});res.json({ok:true,symbol:req.params.symbol,history:d.history||null,times:d.times||null});}catch(e){fail(res,e,502)}});
+app.get('/api/markets/:symbol/tick',async(req,res)=>{try{const d=await ws(PUBLIC_WS,{ticks:req.params.symbol});res.json({ok:true,symbol:req.params.symbol,tick:d.tick||null});}catch(e){fail(res,e,502)}});
 const TYPES=['DIGITMATCH','DIGITDIFF','DIGITEVEN','DIGITODD','DIGITOVER','DIGITUNDER','HIGHER','LOWER','ONETOUCH','NOTOUCH','MULTUP','MULTDOWN','UPORDOWN','ACCU','TURBOSLONG','TURBOSSHORT','VANILLALONGCALL','VANILLALONGPUT','CALL','PUT'];
 const ALIASES={MATCHES:'DIGITMATCH',MATCH:'DIGITMATCH',DIFFERS:'DIGITDIFF',DIFFER:'DIGITDIFF','EVEN/ODD':'DIGITEVEN',EVEN:'DIGITEVEN',ODD:'DIGITODD','OVER/UNDER':'DIGITOVER',OVER:'DIGITOVER',UNDER:'DIGITUNDER','HIGHER/LOWER':'HIGHER',TOUCH:'ONETOUCH','NO_TOUCH':'NOTOUCH','NO-TOUCH':'NOTOUCH'};
-app.post('/api/proposal',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};const type=ALIASES[String(b.contract_type||'').toUpperCase()]||String(b.contract_type||'').toUpperCase();if(!TYPES.includes(type))return res.status(400).json({error:`Unsupported contract type: ${type}`});const p={proposal:1,amount:Number(b.amount??b.stake??1),basis:b.basis||'stake',contract_type:type,currency:b.currency||'USD',duration:Number(b.duration||1),duration_unit:b.duration_unit||'t',underlying_symbol:b.underlying_symbol||b.symbol||'R_100'};for(const k of ['barrier','barrier2','multiplier','growth_rate','selected_tick','payout_per_point'])if(b[k]!==undefined&&b[k]!=='')p[k]=b[k];const result=await authWs(t,b.account_id,p);res.json(result);}catch(e){fail(res,e)}});
+app.post('/api/proposal',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};const type=ALIASES[String(b.contract_type||'').toUpperCase()]||String(b.contract_type||'').toUpperCase();if(!TYPES.includes(type))return res.status(400).json({error:`Unsupported contract type: ${type}`});const p={proposal:1,amount:Number(b.amount??b.stake??1),basis:b.basis||'stake',contract_type:type,currency:b.currency||'USD',duration:Number(b.duration||1),duration_unit:b.duration_unit||'t',underlying_symbol:b.underlying_symbol||b.symbol||'R_100'};for(const k of ['barrier','barrier2','multiplier','growth_rate','selected_tick','payout_per_point'])if(b[k]!==undefined&&b[k]!=='')p[k]=b[k];res.json(await authWs(t,b.account_id,p));}catch(e){fail(res,e)}});
 app.post('/api/buy',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};if(!b.proposal_id)throw new Error('Proposal ID is missing');if(!Number.isFinite(Number(b.price)))throw new Error('Purchase price is missing');res.json(await authWs(t,b.account_id,{buy:String(b.proposal_id),price:Number(b.price),subscribe:1}));}catch(e){fail(res,e)}});
 app.post('/api/sell',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});const b=req.body||{};if(!b.contract_id)throw new Error('Contract ID is missing');res.json(await authWs(t,b.account_id,{sell:String(b.contract_id),price:Number(b.price||0)}));}catch(e){fail(res,e)}});
 app.post('/api/portfolio',async(req,res)=>{try{const t=cookieToken(req);if(!t)return res.status(401).json({error:'Not connected to Deriv. Sign in first.'});res.json(await authWs(t,req.body?.account_id,{portfolio:1,subscribe:1}));}catch(e){fail(res,e)}});
