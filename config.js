@@ -6,6 +6,7 @@ window.GOONFX_CONFIG = {
   GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID'
 };
 
+// Production OAuth bootstrap: Deriv authorization-code + PKCE exchange is handled by the backend.
 (async function handleDerivRootCallback(){
   const p=new URLSearchParams(location.search),code=p.get('code'),state=p.get('state');
   if(!code&&!p.get('error')) return;
