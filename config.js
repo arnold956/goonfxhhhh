@@ -6,28 +6,45 @@ window.GOONFX_CONFIG = {
   GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID'
 };
 
-/* TraderKit-inspired terminal polish: original GOON FX branding/layout, circular live digits,
-   floating market selector, compact terminal spacing, and animated prediction indicator. */
 document.addEventListener('DOMContentLoaded',()=>{
   const style=document.createElement('style');
   style.textContent=`
-  .charttools{position:relative;min-height:48px;padding-left:10px;padding-right:10px}
-  .marketselect{position:absolute;left:10px;top:7px;margin:0;min-width:190px;height:34px;z-index:4;background:#0a0e14ee;border-color:#303947;box-shadow:0 8px 24px #0008;font-weight:800}
-  .charttools button{margin-left:198px}.charttools button:nth-of-type(n+2){margin-left:0}
-  .digitgrid{gap:8px;align-items:center;padding:10px 2px 4px}
-  .digit{position:relative;width:58px;height:58px;justify-self:center;border-radius:50%;border:1px solid #303947;background:radial-gradient(circle at 50% 40%,#151c26 0,#0a0f15 68%);box-shadow:inset 0 0 0 1px #080b10,0 7px 18px #0008;transition:transform .25s,border-color .25s,box-shadow .25s}
-  .digit b{font:800 20px 'Space Grotesk';line-height:1}.digit span{font-size:7px;text-transform:uppercase;letter-spacing:.5px}
-  .digit.hot{border-color:#18c995;box-shadow:0 0 0 1px #18c99555,inset 0 0 22px #0d4b3b,0 0 22px #0e8d6c33;transform:translateY(-3px)}
-  .digit.hot:after{content:'LIVE';position:absolute;top:-9px;right:-2px;font-size:6px;font-weight:900;color:#8ff5d9;background:#08251e;border:1px solid #17634f;border-radius:8px;padding:2px 4px;animation:gxPulse 1.2s infinite}
-  .digit.cold{border-color:#733a35;box-shadow:inset 0 0 18px #351613}
-  .tickline{height:2px;margin:13px 6px 5px;background:linear-gradient(90deg,#ff5f52 0 49%,#2b3440 50%,#19d4a0 51%);overflow:visible}
-  .tickline i{width:11px;height:11px;top:-5px;border:2px solid #07100d;animation:gxSpin 1.05s linear infinite;transition:left .35s}
-  .tickline:before,.tickline:after{position:absolute;top:-16px;font-size:6px;font-weight:900;letter-spacing:.6px}.tickline:before{content:'UNDER';left:0;color:#ff8b80}.tickline:after{content:'OVER';right:0;color:#76edca}
-  .workspace{grid-template-columns:minmax(0,1fr) 285px;gap:8px}.panel{border-radius:7px}.cards{gap:6px}.card{padding:10px;border-radius:7px}
-  .trade{border-top:2px solid #715df1}.tradehead{border-left:0;padding:11px 12px}.tradebtns button{box-shadow:0 7px 18px #0005}
-  @keyframes gxSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  @keyframes gxPulse{0%,100%{opacity:.45}50%{opacity:1}}
-  @media(max-width:850px){.charttools button{margin-left:0}.marketselect{position:relative;left:auto;top:auto;width:100%;margin:3px 0}.charttools{display:flex}.digitgrid{grid-template-columns:repeat(5,1fr)}.digit{width:54px;height:54px}}
+  /* GOON FX visual system inspired by the supplied trading-terminal reference. */
+  body{background:#f5f7f8!important;color:#172033!important}
+  .top{background:#ecfbf6!important;color:#172033!important;border-bottom:1px solid #dbe6e3!important;box-shadow:0 1px 8px #17253612!important}
+  .brand{color:#173047!important}.brand b span{color:#1475a9!important}
+  .mark{background:#0b6a94!important;border-color:#0b6a94!important;color:#fff!important}
+  .top a:not(.brand){background:transparent!important;color:#1c2d3c!important;border-color:transparent!important}
+  .top a:not(.brand):hover{background:#dff4ee!important;color:#082b3e!important}
+  .status{background:#fff!important;border-color:#d9e4e2!important;color:#53626c!important}
+  .account select{background:#fff!important;color:#172033!important;border-color:#cfd9dd!important}
+  .balance small{color:#73808a!important}.balance b{color:#42aeb2!important}
+  .connect{background:#7138e8!important}
+  .layout{background:#f5f7f8!important}
+  .sidebar,.panel,.tools{background:#fff!important;border-color:#dfe5e8!important;box-shadow:0 4px 18px #1725360a!important;color:#172033!important}
+  .sidebar{border-radius:0!important}.navtitle{color:#7c8892!important}.nav button{color:#4d5b66!important;border-bottom-color:#edf0f2!important}
+  .nav button:hover,.nav button.active{background:#eef5fb!important;color:#174c8d!important;box-shadow:inset 3px 0 #287ce1!important}
+  .ico{color:#159fd5!important}
+  .heading h1{color:#172033!important}.heading p,.muted{color:#788690!important}
+  .card{background:#fff!important;border-color:#dfe5e8!important;box-shadow:0 4px 18px #1725360a!important;color:#172033!important}
+  .panelhead{border-bottom-color:#e3e8ea!important}.panelhead b{color:#25333e!important}
+  .charttools{background:#fff!important;border-bottom-color:#e3e8ea!important}.charttools button{color:#697681!important}.charttools button.active,.charttools button:hover{background:#eaf2fb!important;color:#14599b!important}
+  .marketselect{background:#fff!important;color:#172033!important;border-color:#cbd5da!important}
+  .chart{background:#fff!important}.chartmsg{background:#ffffffcc!important;color:#7c8892!important}
+  .chartfoot{background:#fff!important;border-top-color:#e5e9eb!important}.chartfoot b{color:#172033!important}
+  .watch{background:#fff!important}.watchrow{border-bottom-color:#edf0f2!important}.watchrow:hover,.watchrow.active{background:#f0f5f8!important}
+  .watchname,.watchprice{color:#263642!important}.watchbottom{color:#7b8892!important}.live{color:#16aa78!important}
+  .trade{background:#fff!important}.tradehead{background:#fff!important;border-left-color:#397fe6!important;border-bottom-color:#e2e7e9!important}.tradehead b{color:#172033!important}
+  .field label{color:#71808a!important}.field input,.field select{background:#fff!important;color:#172033!important;border-color:#cbd5da!important}
+  .q{border-bottom-color:#edf0f2!important}.q span{color:#7b8790!important}.q b{color:#172033!important}
+  .tradebtns .rise{background:#43b8b8!important}.tradebtns .fall{background:#ef4347!important}
+  .notice{background:#fff9d8!important;border-color:#e8d37c!important;color:#586044!important}.notice.ok{background:#edf9f3!important;border-color:#bde8d3!important;color:#16875e!important}
+  .accountbar{background:#fff!important;color:#25323b!important;border-bottom-color:#e2e7e9!important}.accountlabel{color:#7c8891!important}.accountmode{background:#eef1f3!important;color:#34424b!important}
+  .accountmode.demo{background:#eafaf2!important;color:#11925f!important}.accountmode.real{background:#fff0f1!important;color:#d53a46!important}.accountselect{background:#fff!important;color:#172033!important;border-color:#cbd5da!important}
+  .risk{position:fixed!important;left:22px!important;bottom:20px!important;z-index:200!important;background:#ffd400!important;color:#171717!important;border:0!important;border-radius:6px!important;padding:9px 22px!important;font-weight:900!important;box-shadow:0 5px 16px #0002!important}
+  body:after{content:'AI';position:fixed;right:24px;bottom:18px;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:#7043b7;color:#fff;font-size:30px;font-weight:950;z-index:199;box-shadow:0 0 0 4px #fff,0 0 0 7px #aaa8f4,0 0 0 11px #aaa8f455,0 8px 22px #0003;pointer-events:none}
+  body:before{content:'';position:fixed;right:29px;bottom:83px;width:10px;height:10px;border-radius:50%;background:#00d18a;border:2px solid #fff;z-index:201;pointer-events:none}
+  @media(max-width:850px){body:after{right:14px;bottom:12px;width:64px;height:64px;font-size:25px}.risk{left:12px;bottom:12px}}
   `;
   document.head.appendChild(style);
 });
