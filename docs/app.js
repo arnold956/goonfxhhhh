@@ -16,12 +16,13 @@ async function connectDeriv(){
  sessionStorage.setItem('pkce_code_verifier',codeVerifier);
  sessionStorage.setItem('oauth_state',state);
  const q=new URLSearchParams({response_type:'code',client_id:clientId,redirect_uri:redirect,scope,state,code_challenge:codeChallenge,code_challenge_method:'S256'});
- window.location.assign(`https://auth.deriv.com/oauth2/authorize?${q.toString()}`);
+ // Deriv's current OAuth 2.0 authorization endpoint is /oauth2/auth (not /oauth2/authorize).
+ window.location.assign(`https://auth.deriv.com/oauth2/auth?${q.toString()}`);
 }
 window.goonfxConnect=connectDeriv;
 async function handleDerivCallback(){
  const p=new URLSearchParams(location.search);const code=p.get('code');const returnedState=p.get('state');const error=p.get('error');
- if(error){console.error('Deriv OAuth error',error,p.get('error_description'));history.replaceState({},document.title,location.pathname);return}
+ if(error){console.error('Deriv OAuth error',error,p.get('error_description'));alert(p.get('error_description')||error);history.replaceState({},document.title,location.pathname);return}
  if(!code&&!returnedState)return;
  const savedState=sessionStorage.getItem('oauth_state');const verifier=sessionStorage.getItem('pkce_code_verifier');
  if(!code||!returnedState)throw new Error('Incomplete Deriv OAuth callback.');
