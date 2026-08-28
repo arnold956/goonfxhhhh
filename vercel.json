@@ -9,5 +9,6 @@
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/", "dest": "/docs/index.html" },
     { "src": "/(.*)", "dest": "/docs/$1" }
-  ]
+  ],
+  "trailingSlash": false
 }
