@@ -4,10 +4,11 @@ import crypto from 'node:crypto';
 import WebSocket from 'ws';
 
 const app=express();
-const ORIGIN=(process.env.FRONTEND_ORIGIN||'https://goonfx.com').replace(/\/$/,'');
-const APP_ID=process.env.DERIV_APP_ID||process.env.DERIV_CLIENT_ID||'348AuAfk8ZpsbSW8Whqc3';
-const CLIENT_ID=process.env.DERIV_CLIENT_ID||APP_ID;
-const REDIRECT_URI=process.env.DERIV_REDIRECT_URI||'https://goonfx.com/';
+// Keep public OAuth values identical to the production frontend. Server secrets remain configurable.
+const ORIGIN='https://goonfx.com';
+const APP_ID='348AuAfk8ZpsbSW8Whqc3';
+const CLIENT_ID='348AuAfk8ZpsbSW8Whqc3';
+const REDIRECT_URI='https://goonfx.com/';
 const SESSION_SECRET=process.env.SESSION_SECRET||'goonfx-session-change-me';
 const REST='https://api.derivws.com';
 const PUBLIC_WS='wss://api.derivws.com/trading/v1/options/ws/public';
@@ -35,7 +36,7 @@ async function buy(t,a,id,price){const u=await otp(t,a.account_id);const d=await
 
 app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',deriv:'new-options-api',oauth:true,trading:true}));
 app.get('/api/oauth/config',(_,res)=>res.json({ok:true,client_id:CLIENT_ID,app_id:APP_ID,redirect_uri:REDIRECT_URI,scope:'trade',backend_ready:true}));
-app.post('/api/oauth/exchange',async(req,res)=>{try{const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing.');if(redirect_uri!==REDIRECT_URI||client_id!==CLIENT_ID)throw new Error('OAuth configuration mismatch.');const body=new URLSearchParams({grant_type:'authorization_code',client_id:CLIENT_ID,code,code_verifier,redirect_uri});const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok||!d.access_token)throw new Error(d.error_description||d.error||`OAuth exchange failed (${r.status})`);const max=Math.min(Math.max(Number(d.expires_in)||3600,300),86400);cookie(res,'gx_token',seal(JSON.stringify({token:d.access_token,exp:Date.now()+max*1000})),max);res.json({ok:true,expires_in:max})}catch(e){fail(res,e)}});
+app.post('/api/oauth/exchange',async(req,res)=>{try{const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing.');if(redirect_uri!==REDIRECT_URI||client_id!==CLIENT_ID)throw new Error('OAuth configuration mismatch.');const body=new URLSearchParams({grant_type:'authorization_code',client_id:CLIENT_ID,code,code_verifier,redirect_uri:REDIRECT_URI});const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok||!d.access_token)throw new Error(d.error_description||d.error||`OAuth exchange failed (${r.status})`);const max=Math.min(Math.max(Number(d.expires_in)||3600,300),86400);cookie(res,'gx_token',seal(JSON.stringify({token:d.access_token,exp:Date.now()+max*1000})),max);res.json({ok:true,expires_in:max})}catch(e){fail(res,e)}});
 app.post('/api/logout',(_,res)=>{cookie(res,'gx_token','',0);cookie(res,'gx_account','',0);res.json({ok:true})});
 app.get('/api/accounts',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const a=await accounts(t);const id=selected(req);const current=a.find(x=>x.account_id===id)||a.find(x=>x.account_type==='demo')||a[0];res.json({ok:true,accounts:a.map(x=>({account_id:x.account_id,account_type:x.account_type,mode:x.mode,balance:x.balance,currency:x.currency,status:x.status||'active'})),current})}catch(e){fail(res,e,502)}});
 app.post('/api/select-account',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const id=String(req.body?.account_id||'');const a=(await accounts(t)).find(x=>x.account_id===id);if(!a)throw new Error('Selected account is not available.');cookie(res,'gx_account',id);res.json({ok:true,current:a})}catch(e){fail(res,e)}});
