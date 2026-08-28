@@ -5,8 +5,10 @@ import WebSocket from 'ws';
 
 const app=express();
 const ORIGIN='https://goonfx.com';
-const APP_ID=process.env.DERIV_APP_ID||process.env.DERIV_CLIENT_ID||'34b2ctEChXoL5t579q8pB';
-const CLIENT_ID=process.env.DERIV_CLIENT_ID||APP_ID;
+// The OAuth client/app currently used by the frontend. Keep the legacy V1 app ID separate.
+const CLIENT_ID=process.env.DERIV_CLIENT_ID||'348AuAfk8ZpsbSW8Whqc3';
+const APP_ID=process.env.DERIV_APP_ID||'348AuAfk8ZpsbSW8Whqc3';
+const LEGACY_APP_ID=process.env.DERIV_LEGACY_APP_ID||'34b2ctEChXoL5t579q8pB';
 const REDIRECT_URI=process.env.DERIV_REDIRECT_URI||'https://goonfx.com/';
 const SESSION_SECRET=process.env.SESSION_SECRET;
 const REST='https://api.derivws.com';
@@ -33,8 +35,8 @@ function params(body,a){const type=String(body.contract_type||'').toUpperCase();
 async function proposal(t,a,p){const u=await otp(t,a.account_id);const d=await wsOnce(u,{proposal:1,...p,subscribe:0});return d.proposal||d}
 async function buy(t,a,id,price){const u=await otp(t,a.account_id);const d=await wsOnce(u,{buy:String(id),price:Number(price)});return d.buy||d}
 
-app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',deriv:'new-options-api',oauth:true,trading:true}));
-app.get('/api/oauth/config',(_,res)=>res.json({ok:true,client_id:CLIENT_ID,app_id:APP_ID,redirect_uri:REDIRECT_URI,scope:'trade',backend_ready:true}));
+app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',oauth:true,trading:true,client_id:CLIENT_ID,app_id:APP_ID}));
+app.get('/api/oauth/config',(_,res)=>res.json({ok:true,client_id:CLIENT_ID,app_id:APP_ID,legacy_app_id:LEGACY_APP_ID,redirect_uri:REDIRECT_URI,scope:'trade',backend_ready:Boolean(SESSION_SECRET)}));
 app.post('/api/oauth/exchange',async(req,res)=>{try{if(!SESSION_SECRET)throw new Error('SESSION_SECRET is not configured on the backend.');const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing.');if(redirect_uri!==REDIRECT_URI||client_id!==CLIENT_ID)throw new Error('OAuth configuration mismatch.');const body=new URLSearchParams({grant_type:'authorization_code',client_id:CLIENT_ID,code,code_verifier,redirect_uri:REDIRECT_URI});const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok||!d.access_token)throw new Error(d.error_description||d.error||`OAuth exchange failed (${r.status})`);const max=Math.min(Math.max(Number(d.expires_in)||3600,300),86400);cookie(res,'gx_token',seal(JSON.stringify({token:d.access_token,exp:Date.now()+max*1000})),max);res.json({ok:true,expires_in:max})}catch(e){fail(res,e)}});
 app.post('/api/logout',(_,res)=>{cookie(res,'gx_token','',0);cookie(res,'gx_account','',0);res.json({ok:true})});
 app.get('/api/accounts',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const a=await accounts(t);const id=selected(req);const current=a.find(x=>x.account_id===id)||a.find(x=>x.account_type==='demo')||a[0];res.json({ok:true,accounts:a.map(x=>({account_id:x.account_id,account_type:x.account_type,mode:x.mode,balance:x.balance,currency:x.currency,status:x.status||'active'})),current})}catch(e){fail(res,e,502)}});
