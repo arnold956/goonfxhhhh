@@ -5,9 +5,9 @@ import WebSocket from 'ws';
 
 const app=express();
 const ORIGIN='https://goonfx.com';
-// The OAuth client/app currently used by the frontend. Keep the legacy V1 app ID separate.
 const CLIENT_ID=process.env.DERIV_CLIENT_ID||'348AuAfk8ZpsbSW8Whqc3';
-const APP_ID=process.env.DERIV_APP_ID||'348AuAfk8ZpsbSW8Whqc3';
+// New Deriv REST API calls must use the OAuth application's App ID, not the legacy V1 app_id.
+const APP_ID=process.env.DERIV_API_APP_ID||CLIENT_ID;
 const LEGACY_APP_ID=process.env.DERIV_LEGACY_APP_ID||'34b2ctEChXoL5t579q8pB';
 const REDIRECT_URI=process.env.DERIV_REDIRECT_URI||'https://goonfx.com/';
 const SESSION_SECRET=process.env.SESSION_SECRET;
@@ -15,7 +15,6 @@ const REST='https://api.derivws.com';
 const PUBLIC_WS='wss://api.derivws.com/trading/v1/options/ws/public';
 app.use(cors({origin:ORIGIN,credentials:true,methods:['GET','POST','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
 app.use(express.json({limit:'300kb'}));
-
 const key=()=>crypto.createHash('sha256').update(SESSION_SECRET||'missing-secret').digest();
 function seal(v){const iv=crypto.randomBytes(12),c=crypto.createCipheriv('aes-256-gcm',key(),iv),e=Buffer.concat([c.update(v,'utf8'),c.final()]);return Buffer.concat([iv,c.getAuthTag(),e]).toString('base64url')}
 function unseal(v){const b=Buffer.from(v,'base64url');if(b.length<28)throw new Error('Invalid session');const d=crypto.createDecipheriv('aes-256-gcm',key(),b.subarray(0,12));d.setAuthTag(b.subarray(12,28));return Buffer.concat([d.update(b.subarray(28)),d.final()]).toString('utf8')}
@@ -34,9 +33,8 @@ function market(payload){return wsOnce(PUBLIC_WS,payload,15000)}
 function params(body,a){const type=String(body.contract_type||'').toUpperCase();const allowed=new Set(['DIGITEVEN','DIGITODD','DIGITOVER','DIGITUNDER','DIGITMATCH','DIGITDIFF','HIGHER','LOWER','UPORDOWN','ONETOUCH','NOTOUCH','MULTUP','MULTDOWN']);if(!allowed.has(type))throw new Error('Unsupported contract type.');const amount=Number(body.amount??body.stake);if(!Number.isFinite(amount)||amount<=0)throw new Error('Enter a valid stake.');const symbol=String(body.underlying_symbol||body.symbol||'').trim();if(!symbol)throw new Error('Select a market.');const duration=Math.max(1,Math.floor(Number(body.duration||1)));const unit=String(body.duration_unit||'t');if(!['t','s','m','h','d'].includes(unit))throw new Error('Invalid duration unit.');const p={amount,basis:'stake',contract_type:type,currency:a.currency||'USD',underlying_symbol:symbol,duration,duration_unit:unit};if(['DIGITOVER','DIGITUNDER','DIGITMATCH','DIGITDIFF'].includes(type)){const b=String(body.barrier??body.digit??'');if(!/^\d$/.test(b))throw new Error('Choose a digit 0-9.');p.barrier=b}if(['HIGHER','LOWER','ONETOUCH','NOTOUCH'].includes(type)){const b=String(body.barrier??'');if(!b)throw new Error('Barrier required.');p.barrier=b}if(['MULTUP','MULTDOWN'].includes(type))p.multiplier=Number(body.multiplier||10);return p}
 async function proposal(t,a,p){const u=await otp(t,a.account_id);const d=await wsOnce(u,{proposal:1,...p,subscribe:0});return d.proposal||d}
 async function buy(t,a,id,price){const u=await otp(t,a.account_id);const d=await wsOnce(u,{buy:String(id),price:Number(price)});return d.buy||d}
-
-app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',oauth:true,trading:true,client_id:CLIENT_ID,app_id:APP_ID}));
-app.get('/api/oauth/config',(_,res)=>res.json({ok:true,client_id:CLIENT_ID,app_id:APP_ID,legacy_app_id:LEGACY_APP_ID,redirect_uri:REDIRECT_URI,scope:'trade',backend_ready:Boolean(SESSION_SECRET)}));
+app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',oauth:true,trading:true,client_id:CLIENT_ID,api_app_id:APP_ID,legacy_app_id:LEGACY_APP_ID,session_secret_configured:Boolean(SESSION_SECRET)}));
+app.get('/api/oauth/config',(_,res)=>res.json({ok:true,client_id:CLIENT_ID,api_app_id:APP_ID,legacy_app_id:LEGACY_APP_ID,redirect_uri:REDIRECT_URI,scope:'trade',backend_ready:Boolean(SESSION_SECRET)}));
 app.post('/api/oauth/exchange',async(req,res)=>{try{if(!SESSION_SECRET)throw new Error('SESSION_SECRET is not configured on the backend.');const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing.');if(redirect_uri!==REDIRECT_URI||client_id!==CLIENT_ID)throw new Error('OAuth configuration mismatch.');const body=new URLSearchParams({grant_type:'authorization_code',client_id:CLIENT_ID,code,code_verifier,redirect_uri:REDIRECT_URI});const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok||!d.access_token)throw new Error(d.error_description||d.error||`OAuth exchange failed (${r.status})`);const max=Math.min(Math.max(Number(d.expires_in)||3600,300),86400);cookie(res,'gx_token',seal(JSON.stringify({token:d.access_token,exp:Date.now()+max*1000})),max);res.json({ok:true,expires_in:max})}catch(e){fail(res,e)}});
 app.post('/api/logout',(_,res)=>{cookie(res,'gx_token','',0);cookie(res,'gx_account','',0);res.json({ok:true})});
 app.get('/api/accounts',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const a=await accounts(t);const id=selected(req);const current=a.find(x=>x.account_id===id)||a.find(x=>x.account_type==='demo')||a[0];res.json({ok:true,accounts:a.map(x=>({account_id:x.account_id,account_type:x.account_type,mode:x.mode,balance:x.balance,currency:x.currency,status:x.status||'active'})),current})}catch(e){fail(res,e,502)}});
@@ -50,5 +48,4 @@ app.post('/api/proposal',async(req,res)=>{try{const t=token(req);if(!t)return re
 app.post('/api/proposal-real',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const a=await account(t,req);if(a.account_type!=='real')throw new Error('A real Deriv account must be selected.');const p=await proposal(t,a,params(req.body||{},a));res.json({ok:true,account:a,proposal:p})}catch(e){fail(res,e,502)}});
 app.post('/api/buy',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const a=await account(t,req);const id=String(req.body?.proposal_id||'');const price=Number(req.body?.price);if(!id||!Number.isFinite(price)||price<=0)throw new Error('Valid proposal ID and price are required.');const b=await buy(t,a,id,price);res.json({ok:true,executed:Boolean(b.contract_id),account:a,buy:b,contract_id:b.contract_id})}catch(e){fail(res,e,502)}});
 app.post('/api/trade',async(req,res)=>{try{const t=token(req);if(!t)return res.status(401).json({error:'Not connected to Deriv.'});const a=await account(t,req);const p=await proposal(t,a,params(req.body||{},a));const b=await buy(t,a,p.id,p.ask_price);res.json({ok:true,executed:Boolean(b.contract_id),account:a,proposal:p,buy:b,contract_id:b.contract_id})}catch(e){fail(res,e,502)}});
-
 export default app;
