@@ -11,9 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const FRONTEND_DIR = path.resolve(__dirname, '../docs');
 const ORIGIN = (process.env.FRONTEND_ORIGIN || 'https://goonfx.com').replace(/\/$/, '');
-const APP_ID = process.env.DERIV_APP_ID || process.env.DERIV_CLIENT_ID || '34b2ctEChXoL5t579q8pB';
+const APP_ID = process.env.DERIV_APP_ID || process.env.DERIV_CLIENT_ID || '348AuAfk8ZpsbSW8Whqc3';
 const CLIENT_ID = process.env.DERIV_CLIENT_ID || APP_ID;
-const REDIRECT_URI = process.env.DERIV_REDIRECT_URI || 'https://goonfx.com/callback.html';
+const REDIRECT_URI = process.env.DERIV_REDIRECT_URI || 'https://goonfx.com/';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
 const DERIV_REST = 'https://api.derivws.com';
 const PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
@@ -30,8 +30,8 @@ function cookie(req,name){ return (req.headers.cookie||'').match(new RegExp(`(?:
 function session(req){ const raw=cookie(req,'gx_token'); if(!raw)return null; try{const v=decodeURIComponent(raw);const d=SESSION_SECRET?JSON.parse(unseal(v)):JSON.parse(Buffer.from(v,'base64url').toString());return d.exp>Date.now()?d:null;}catch{return null;} }
 function token(req){ return session(req)?.token || null; }
 function selected(req){ const raw=cookie(req,'gx_account'); return raw ? decodeURIComponent(raw) : null; }
-function setCookie(res,name,value,maxAge=3600){ res.append('Set-Cookie',`${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`); }
-function clearCookies(res){ res.append('Set-Cookie','gx_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'); res.append('Set-Cookie','gx_account=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'); }
+function setCookie(res,name,value,maxAge=3600){ res.append('Set-Cookie',`${name}=${encodeURIComponent(value)}; Domain=.goonfx.com; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`); }
+function clearCookies(res){ res.append('Set-Cookie','gx_token=; Domain=.goonfx.com; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'); res.append('Set-Cookie','gx_account=; Domain=.goonfx.com; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'); }
 function fail(res,e,status=400){res.status(e.status||status).json({error:e.message||'Request failed',details:e.data||null});}
 function authHeaders(t){return {'Deriv-App-ID':APP_ID,'Authorization':`Bearer ${t}`,'Content-Type':'application/json'};}
 
