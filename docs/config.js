@@ -11,12 +11,13 @@ window.GOONFX_CONFIG = Object.freeze({
   var isCallback=path==='callback.html';
   var key='goonfx_authenticated';
   if(!isEntry&&!isCallback){
+    var css=document.createElement('link');css.rel='stylesheet';css.href='traderkit-shell.css?v=20260829';document.head.appendChild(css);
     var enh=document.createElement('script');enh.src='terminal-enhancements.js?v=20260829';enh.defer=true;document.head.appendChild(enh);
   }
   if(isCallback)return;
   if(!sessionStorage.getItem(key)){
     document.documentElement.classList.add('goonfx-auth-pending');
-    var css=document.createElement('style');css.textContent='html.goonfx-auth-pending body{visibility:hidden!important}';document.head.appendChild(css);
+    var hide=document.createElement('style');hide.textContent='html.goonfx-auth-pending body{visibility:hidden!important}';document.head.appendChild(hide);
     if(!isEntry){location.replace('index.html');return;}
     document.addEventListener('DOMContentLoaded',function(){
       document.documentElement.classList.remove('goonfx-auth-pending');
