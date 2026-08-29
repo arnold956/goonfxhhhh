@@ -13,6 +13,7 @@ window.GOONFX_CONFIG = Object.freeze({
   if(!isEntry&&!isCallback){
     var css=document.createElement('link');css.rel='stylesheet';css.href='traderkit-shell.css?v=20260829';document.head.appendChild(css);
     var enh=document.createElement('script');enh.src='terminal-enhancements.js?v=20260829';enh.defer=true;document.head.appendChild(enh);
+    var pro=document.createElement('script');pro.src='pro-terminal.js?v=20260829-2';pro.defer=true;document.head.appendChild(pro);
   }
   if(isCallback)return;
   if(!sessionStorage.getItem(key)){
