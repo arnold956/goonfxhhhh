@@ -10,6 +10,9 @@ window.GOONFX_CONFIG = Object.freeze({
   var isEntry=path===''||path==='index.html';
   var isCallback=path==='callback.html';
   var key='goonfx_authenticated';
+  if(!isEntry&&!isCallback){
+    var enh=document.createElement('script');enh.src='terminal-enhancements.js?v=20260829';enh.defer=true;document.head.appendChild(enh);
+  }
   if(isCallback)return;
   if(!sessionStorage.getItem(key)){
     document.documentElement.classList.add('goonfx-auth-pending');
