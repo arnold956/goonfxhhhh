@@ -11,8 +11,8 @@ window.GOONFX_CONFIG = Object.freeze({
   var isCallback=path==='callback.html';
   var key='goonfx_authenticated';
   if(!isEntry&&!isCallback){
-    var css=document.createElement('link');css.rel='stylesheet';css.href='traderkit-shell.css?v=20260829';document.head.appendChild(css);
-    ['terminal-enhancements.js?v=20260829','pro-terminal.js?v=20260829-2','bot-builder.js?v=20260829-3'].forEach(function(src){var s=document.createElement('script');s.src=src;s.defer=true;document.head.appendChild(s);});
+    var css=document.createElement('link');css.rel='stylesheet';css.href='traderkit-shell.css?v=20260829-4';document.head.appendChild(css);
+    ['terminal-enhancements.js?v=20260829-4','pro-terminal.js?v=20260829-4','bot-studio.js?v=20260829-1'].forEach(function(src){var s=document.createElement('script');s.src=src;s.defer=true;document.head.appendChild(s);});
   }
   if(isCallback)return;
   if(!sessionStorage.getItem(key)){
