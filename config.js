@@ -3,31 +3,85 @@ window.GOONFX_CONFIG = {
   DERIV_APP_ID: '34b2ctEChXoL5t579q8pB',
   DERIV_REDIRECT_URI: 'https://goonfx.com/',
   DERIV_SCOPE: 'trade',
-  BACKEND_URL: 'https://api.goonfx.com',
-  GOOGLE_CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID'
+  BACKEND_URL: 'https://api.goonfx.com'
 };
 
 (function(){
   const cfg=window.GOONFX_CONFIG;
+  const LOGIN_FLAG='goonfx_login_started';
   const base64url=b=>btoa(String.fromCharCode(...b)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-  async function startDerivLogin(){
+  const api=(path,opts={})=>fetch(cfg.BACKEND_URL+path,{credentials:'include',...opts,headers:{'Content-Type':'application/json',...(opts.headers||{})}});
+
+  async function startDerivLogin(auto=false){
     if(!cfg.DERIV_CLIENT_ID){alert('Deriv login is not configured.');return;}
+    if(auto)sessionStorage.setItem(LOGIN_FLAG,'1');
     const state=crypto.randomUUID(),bytes=new Uint8Array(64);crypto.getRandomValues(bytes);
     const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
     const verifier=Array.from(bytes,v=>alphabet[v%alphabet.length]).join('');
     const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));
     const challenge=base64url(new Uint8Array(hash));
-    sessionStorage.setItem('deriv_state',state);sessionStorage.setItem('deriv_verifier',verifier);
-    const u=new URL('https://auth.deriv.com/oauth2/auth');u.search=new URLSearchParams({response_type:'code',client_id:cfg.DERIV_CLIENT_ID,redirect_uri:cfg.DERIV_REDIRECT_URI,scope:cfg.DERIV_SCOPE||'trade',state,code_challenge:challenge,code_challenge_method:'S256'}).toString();location.assign(u.toString());
+    sessionStorage.setItem('deriv_state',state);
+    sessionStorage.setItem('deriv_verifier',verifier);
+    const u=new URL('https://auth.deriv.com/oauth2/auth');
+    u.search=new URLSearchParams({response_type:'code',client_id:cfg.DERIV_CLIENT_ID,redirect_uri:cfg.DERIV_REDIRECT_URI,scope:cfg.DERIV_SCOPE||'trade',state,code_challenge:challenge,code_challenge_method:'S256'}).toString();
+    location.assign(u.toString());
   }
+
   async function handleDerivCallback(){
-    const p=new URLSearchParams(location.search),code=p.get('code'),state=p.get('state'),error=p.get('error');if(!code&&!error)return;
-    if(error){sessionStorage.removeItem('deriv_state');sessionStorage.removeItem('deriv_verifier');history.replaceState({},'',location.pathname);return;}
+    const p=new URLSearchParams(location.search),code=p.get('code'),state=p.get('state'),error=p.get('error');
+    if(!code&&!error)return false;
+    if(error){sessionStorage.removeItem('deriv_state');sessionStorage.removeItem('deriv_verifier');sessionStorage.removeItem(LOGIN_FLAG);history.replaceState({},'',location.pathname);return true;}
     const expected=sessionStorage.getItem('deriv_state'),verifier=sessionStorage.getItem('deriv_verifier');
-    if(!code||!state||state!==expected||!verifier){history.replaceState({},'',location.pathname);alert('Deriv login session expired.');return;}
-    try{const r=await fetch(cfg.BACKEND_URL+'/api/oauth/exchange',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,state,code_verifier:verifier,redirect_uri:cfg.DERIV_REDIRECT_URI,client_id:cfg.DERIV_CLIENT_ID})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'OAuth exchange failed');sessionStorage.removeItem('deriv_state');sessionStorage.removeItem('deriv_verifier');history.replaceState({},'',location.pathname);location.reload();}catch(e){history.replaceState({},'',location.pathname);alert('Deriv connection failed: '+e.message);}
+    if(!code||!state||state!==expected||!verifier){sessionStorage.removeItem(LOGIN_FLAG);history.replaceState({},'',location.pathname);alert('Deriv login session expired. Please log in again.');return true;}
+    try{
+      const r=await api('/api/oauth/exchange',{method:'POST',body:JSON.stringify({code,state,code_verifier:verifier,redirect_uri:cfg.DERIV_REDIRECT_URI,client_id:cfg.DERIV_CLIENT_ID})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||'OAuth exchange failed');
+      sessionStorage.removeItem('deriv_state');sessionStorage.removeItem('deriv_verifier');sessionStorage.removeItem(LOGIN_FLAG);
+      history.replaceState({},'',location.pathname);
+      return true;
+    }catch(e){sessionStorage.removeItem('deriv_state');sessionStorage.removeItem('deriv_verifier');sessionStorage.removeItem(LOGIN_FLAG);history.replaceState({},'',location.pathname);alert('Deriv connection failed: '+e.message);return true;}
   }
-  function googleLogin(){if(!cfg.GOOGLE_CLIENT_ID||cfg.GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID'){alert('Google login is not configured on this deployment yet.');return;}const state=crypto.randomUUID();sessionStorage.setItem('google_state',state);const u=new URL('https://accounts.google.com/o/oauth2/v2/auth');u.search=new URLSearchParams({client_id:cfg.GOOGLE_CLIENT_ID,redirect_uri:location.origin+'/',response_type:'code',scope:'openid email profile',state,access_type:'online',prompt:'select_account'}).toString();location.assign(u.toString());}
-  function addLogin(){const top=document.querySelector('.account');if(!top||document.getElementById('gx-login-actions'))return;const wrap=document.createElement('div');wrap.id='gx-login-actions';wrap.style='display:flex;gap:6px;align-items:center';const d=document.createElement('button');d.className='connect';d.textContent='Login with Deriv';d.onclick=startDerivLogin;const g=document.createElement('button');g.className='connect';g.style='background:#11161f;border:1px solid #303846';g.textContent='Login with Google';g.onclick=googleLogin;wrap.append(d,g);top.replaceChildren(wrap);}
-  document.addEventListener('DOMContentLoaded',()=>{addLogin();handleDerivCallback();});
+
+  function setTopConnected(account){
+    const top=document.querySelector('.account');if(!top)return;
+    top.innerHTML='<div class="account-live" style="display:flex;align-items:center;gap:8px"><select id="gxAccountSelect" style="height:38px;background:#0c1118;color:#fff;border:1px solid #2a3441;border-radius:7px;padding:0 10px;font-weight:700"></select><button id="gxLogout" class="connect" style="background:#11161f;border:1px solid #303846">Logout</button></div>';
+    const sel=top.querySelector('#gxAccountSelect');
+    fetchAccounts(sel,account);
+    top.querySelector('#gxLogout').onclick=async()=>{try{await api('/api/logout',{method:'POST'});}finally{location.href='/';}};
+  }
+
+  async function fetchAccounts(sel,current){
+    try{
+      const r=await api('/api/accounts');if(!r.ok)throw new Error('Not connected');
+      const d=await r.json();sel.innerHTML='';
+      (d.accounts||[]).forEach(a=>{const o=document.createElement('option');o.value=a.account_id;o.textContent=`${a.account_id} · ${a.mode} · ${Number(a.balance||0).toFixed(2)} ${a.currency||''}`;if((d.current||current)?.account_id===a.account_id)o.selected=true;sel.appendChild(o);});
+      sel.onchange=async()=>{await api('/api/select-account',{method:'POST',body:JSON.stringify({account_id:sel.value})});window.dispatchEvent(new CustomEvent('goonfx:account-changed'));};
+    }catch{}
+  }
+
+  function showLoginButton(){
+    const top=document.querySelector('.account');if(!top)return;
+    top.innerHTML='';
+    const b=document.createElement('button');b.className='connect';b.textContent='Login with Deriv';b.onclick=()=>startDerivLogin(false);top.appendChild(b);
+  }
+
+  async function ensureAuth(){
+    try{
+      const r=await api('/api/account');
+      if(r.ok){const d=await r.json();setTopConnected(d.account);return true;}
+    }catch{}
+    showLoginButton();
+    if(!sessionStorage.getItem(LOGIN_FLAG) && location.pathname!=='/callback.html'){
+      setTimeout(()=>startDerivLogin(true),250);
+    }
+    return false;
+  }
+
+  window.GOONFX_LOGIN=startDerivLogin;
+  document.addEventListener('DOMContentLoaded',async()=>{
+    const callback=await handleDerivCallback();
+    await ensureAuth();
+    if(callback)window.dispatchEvent(new CustomEvent('goonfx:authenticated'));
+  });
 })();
