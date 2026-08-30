@@ -6,12 +6,16 @@
     { "src": "api/account.js", "use": "@vercel/node" },
     { "src": "api/accounts.js", "use": "@vercel/node" },
     { "src": "docs/**", "use": "@vercel/static" },
+    { "src": "dashboard.html", "use": "@vercel/static" },
+    { "src": "options.html", "use": "@vercel/static" },
     { "src": "free-bot.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/account", "dest": "/api/account.js" },
     { "src": "/api/accounts", "dest": "/api/accounts.js" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/dashboard.html", "dest": "/dashboard.html" },
+    { "src": "/options.html", "dest": "/options.html" },
     { "src": "/free-bot.html", "dest": "/free-bot.html" },
     { "src": "/", "dest": "/docs/index.html" },
     { "src": "/(.*)", "dest": "/docs/$1" }
