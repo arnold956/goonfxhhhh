@@ -18,5 +18,6 @@ window.GOONFX_CONFIG = {
   function showLoginButton(){const top=document.querySelector('.account');if(!top)return;top.innerHTML='';const b=document.createElement('button');b.className='connect';b.textContent='Login with Deriv';b.onclick=()=>startDerivLogin(false);top.appendChild(b);}
   async function ensureAuth(){try{const r=await api('/api/account');if(r.ok){const d=await r.json();setTopConnected(d.account);return true;}}catch{}showLoginButton();if(!sessionStorage.getItem(LOGIN_FLAG)&&location.pathname!=='/callback.html')setTimeout(()=>startDerivLogin(true),250);return false;}
   window.GOONFX_LOGIN=startDerivLogin;
+  window.goonfxLogin=startDerivLogin;
   document.addEventListener('DOMContentLoaded',async()=>{const callback=await handleDerivCallback();await ensureAuth();if(callback)window.dispatchEvent(new CustomEvent('goonfx:authenticated'));const s=document.createElement('script');s.src='/workspace-v2.js?v=20260829';document.head.appendChild(s);});
 })();
