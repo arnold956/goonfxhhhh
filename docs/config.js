@@ -26,5 +26,5 @@ window.GOONFX_CONFIG = Object.freeze({
       if(button)button.onclick=login;
       setTimeout(login,250);
     });
-  }else if(isEntry){location.replace('/dashboard.html?v=20260830');}
+  }else if(isEntry){location.replace('/dashboard-v2.html?v=20260901');}
 })();
