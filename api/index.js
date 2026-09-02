@@ -10,19 +10,22 @@ const REDIRECT_URI = process.env.DERIV_REDIRECT_URI || 'https://goonfx.com/callb
 const REST = 'https://api.derivws.com';
 const PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
 
-app.use(cors({ origin: ORIGIN, credentials: true, methods: ['GET','POST','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
+const ALLOWED_ORIGINS = new Set([
+  ORIGIN,
+  'https://goonfx.com',
+  'https://arnold956.github.io',
+  'https://goonfx-nkyefadc4-arnoldrodgers14-9689s-projects.vercel.app',
+  'https://goonfx-arnoldrodgers14-9689s-projects.vercel.app',
+  'https://goonfx-git-main-arnoldrodgers14-9689s-projects.vercel.app'
+]);
+app.use(cors({ origin(origin, cb) { if (!origin || ALLOWED_ORIGINS.has(origin)) return cb(null, true); return cb(new Error('Origin not allowed')); }, credentials: true, methods: ['GET','POST','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
 app.use(express.json({ limit: '300kb' }));
-// The API custom domain is served at the root, while the frontend historically calls /api/*.
-// Normalize both forms so existing login/trading callers continue to work without changing OAuth.
-app.use((req, res, next) => {
-  if (req.url === '/api' || req.url.startsWith('/api/')) req.url = req.url.slice(4) || '/';
-  next();
-});
+app.use((req, res, next) => { if (req.url === '/api' || req.url.startsWith('/api/')) req.url = req.url.slice(4) || '/'; next(); });
 function getCookie(req,name){const m=(req.headers.cookie||'').match(new RegExp(`(?:^|; )${name}=([^;]+)`));return m?decodeURIComponent(m[1]):null}
 function setCookie(res,name,value,maxAge=86400){res.append('Set-Cookie',`${name}=${encodeURIComponent(value)}; Domain=.goonfx.com; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`)}
 function bearer(req){return getCookie(req,'gx_token')}
 function fail(res,err,status=400){res.status(err.status||status).json({error:err.message||'Request failed',details:err.data||null})}
-function derivHeaders(token){if(!API_APP_ID)throw new Error('Deriv API App ID is not configured on the server.');return {'Deriv-App-ID':API_APP_ID,Authorization:`Bearer ${token}`,'Content-Type':'application/json'}}
+function derivHeaders(token){if(!token)throw new Error('Deriv access token is missing.');const h={Authorization:`Bearer ${token}`,'Content-Type':'application/json'};if(API_APP_ID)h['Deriv-App-ID']=API_APP_ID;return h}
 async function deriv(token,path,options={}){const r=await fetch(REST+path,{...options,headers:{...derivHeaders(token),...(options.headers||{})}});const text=await r.text();let data={};try{data=text?JSON.parse(text):{}}catch{data={error:text}}if(!r.ok){const e=new Error(data?.errors?.[0]?.message||data?.error_description||data?.error||`Deriv HTTP ${r.status}`);e.status=r.status;e.data=data;throw e}return data}
 function wsOnce(url,payload,timeout=15000){return new Promise((resolve,reject)=>{const ws=new WebSocket(url);let done=false;const finish=(fn,value)=>{if(done)return;done=true;clearTimeout(timer);try{ws.close()}catch{}fn(value)};const timer=setTimeout(()=>finish(reject,new Error('Deriv trading connection timed out')),timeout);ws.on('open',()=>ws.send(JSON.stringify({...payload,req_id:1})));ws.on('message',raw=>{try{const d=JSON.parse(raw);if(d.error)return finish(reject,new Error(d.error.message||'Deriv trading error'));finish(resolve,d)}catch(e){finish(reject,e)}});ws.on('error',e=>finish(reject,e));ws.on('close',()=>{if(!done)finish(reject,new Error('Deriv WebSocket closed'))})})}
 function publicWs(payload,timeout=15000){return wsOnce(PUBLIC_WS,payload,timeout)}
@@ -35,7 +38,7 @@ async function proposal(token,account,params){const url=await otp(token,account.
 async function buy(token,account,proposalId,price){const url=await otp(token,account.account_id);const d=await wsOnce(url,{buy:String(proposalId),price:Number(price)});if(!d.buy)throw new Error(d.error?.message||'Deriv did not confirm the purchase.');return d.buy}
 async function accountRequest(token,accountId,payload){const url=await otp(token,accountId);return wsOnce(url,payload)}
 
-app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',oauth:true,trading:true,configured:Boolean(API_APP_ID),redirect_uri:REDIRECT_URI}));
+app.get('/health',(_,res)=>res.json({ok:true,service:'goonfx-api',oauth:true,trading:true,configured:Boolean(CLIENT_ID),legacy_app_id_configured:Boolean(API_APP_ID),redirect_uri:REDIRECT_URI}));
 app.get('/oauth/config',(_,res)=>res.json({ok:true,client_id:CLIENT_ID,api_app_id_configured:Boolean(API_APP_ID),redirect_uri:REDIRECT_URI,scope:'trade'}));
 app.post('/oauth/exchange',async(req,res)=>{try{const {code,code_verifier,redirect_uri,client_id}=req.body||{};if(!code||!code_verifier)throw new Error('Authorization code or PKCE verifier is missing.');if(redirect_uri!==REDIRECT_URI||client_id!==CLIENT_ID)throw new Error('OAuth configuration mismatch.');const body=new URLSearchParams({grant_type:'authorization_code',client_id:CLIENT_ID,code,code_verifier,redirect_uri:REDIRECT_URI});const r=await fetch('https://auth.deriv.com/oauth2/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok||!d.access_token)throw new Error(d.error_description||d.error||`OAuth exchange failed (${r.status})`);const max=Math.min(Math.max(Number(d.expires_in)||3600,300),86400);setCookie(res,'gx_token',d.access_token,max);res.json({ok:true,expires_in:max})}catch(e){fail(res,e)}});
 app.post('/logout',(_,res)=>{setCookie(res,'gx_token','',0);setCookie(res,'gx_account','',0);res.json({ok:true})});
