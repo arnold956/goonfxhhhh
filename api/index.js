@@ -5,7 +5,7 @@ import WebSocket from 'ws';
 const app = express();
 const ORIGIN = process.env.FRONTEND_ORIGIN || 'https://goonfx.com';
 const CLIENT_ID = process.env.DERIV_CLIENT_ID || '348AuAfk8ZpsbSW8Whqc3';
-const API_APP_ID = process.env.DERIV_API_APP_ID || process.env.DERIV_APP_ID || '34eWQz9dZcOBcg3YSwOTd';
+const API_APP_ID = process.env.DERIV_API_APP_ID || process.env.DERIV_APP_ID || '34b2ctEChXoL5t579q8pB';
 const REDIRECT_URI = process.env.DERIV_REDIRECT_URI || 'https://goonfx.com/';
 const REST = 'https://api.derivws.com';
 const PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
