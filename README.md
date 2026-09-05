@@ -20,4 +20,4 @@ The frontend can be served from GitHub Pages. The OAuth token exchange cannot ru
 
 Production deployment trigger: OAuth redirect, account selection, live balance, and Deriv feed integration updated.
 
-Deployment verification trigger: 2026-08-27 production sync.
+Deployment verification trigger: 2026-09-05 production redeploy.
