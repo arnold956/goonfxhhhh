@@ -1,5 +1,5 @@
 window.GOONFX_CONFIG={
-  BACKEND_URL:'https://api.goonfx.com',
+  BACKEND_URL:'https://goonfx-arnoldrodgers14-9689s-projects.vercel.app',
   DERIV_CLIENT_ID:'348AuAfk8ZpsbSW8Whqc3',
   DERIV_APP_ID:'34b2ctEChXoL5t579q8pB',
   DERIV_REDIRECT_URI:'https://goonfx.com/',
@@ -7,8 +7,6 @@ window.GOONFX_CONFIG={
 };
 
 // Start Deriv OAuth immediately when the public site is opened.
-// The existing app.js callback handler completes the OAuth exchange and
-// reveals the dashboard after the user authorizes the account at Deriv.
 (async()=>{
   const cfg=window.GOONFX_CONFIG;
   const p=new URLSearchParams(location.search);
@@ -28,13 +26,9 @@ window.GOONFX_CONFIG={
     sessionStorage.setItem('gx_state',state);
     const u=new URL('https://auth.deriv.com/oauth2/auth');
     u.search=new URLSearchParams({
-      response_type:'code',
-      client_id:cfg.DERIV_CLIENT_ID,
-      redirect_uri:cfg.DERIV_REDIRECT_URI,
-      scope:cfg.DERIV_SCOPE,
-      state,
-      code_challenge:challenge,
-      code_challenge_method:'S256'
+      response_type:'code',client_id:cfg.DERIV_CLIENT_ID,
+      redirect_uri:cfg.DERIV_REDIRECT_URI,scope:cfg.DERIV_SCOPE,state,
+      code_challenge:challenge,code_challenge_method:'S256'
     });
     location.replace(u.toString());
   }catch(e){
