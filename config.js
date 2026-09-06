@@ -2,7 +2,7 @@ window.GOONFX_CONFIG={
   BACKEND_URL:'https://goonfx-arnoldrodgers14-9689s-projects.vercel.app',
   DERIV_CLIENT_ID:'348AuAfk8ZpsbSW8Whqc3',
   DERIV_APP_ID:'34b2ctEChXoL5t579q8pB',
-  DERIV_REDIRECT_URI:'https://goonfx.com/',
+  DERIV_REDIRECT_URI:'https://goonfx.com/callback.html',
   DERIV_SCOPE:'trade'
 };
 
