@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="48" viewBox="0 0 180 48" role="img" aria-labelledby="title desc">
+  <title id="title">binarykit.pro</title>
+  <desc id="desc">BinaryKit.pro logo</desc>
+  <rect width="180" height="48" rx="10" fill="#0b0f14"/>
+  <g transform="translate(10 10)">
+    <rect x="0" y="0" width="28" height="28" rx="7" fill="#ff1744"/>
+    <path d="M8 8h12v4H12v4h7v4h-7v4H8V8zm14 0h4v20h-4V8z" fill="#fff"/>
+  </g>
+  <text x="48" y="30" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#fff">binarykit<tspan fill="#ff1744">.pro</tspan></text>
+</svg>
